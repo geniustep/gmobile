@@ -13,7 +13,7 @@ class ProductModel {
   final dynamic volume;
   final dynamic weight;
   final dynamic packaging_ids;
-  final dynamic image_512;
+  final dynamic image_128;
   final dynamic write_date;
   final dynamic display_name;
   final dynamic create_uid;
@@ -35,7 +35,7 @@ class ProductModel {
     this.volume,
     this.weight,
     this.packaging_ids,
-    this.image_512,
+    this.image_128,
     this.write_date,
     this.display_name,
     this.create_uid,
@@ -48,8 +48,7 @@ class ProductModel {
     this.sales_count,
   });
 
-  factory ProductModel.fromJson(Map<String, dynamic> json) =>
-      _$ProductModelFromJson(json);
+  factory ProductModel.fromJson(Map<String, dynamic> json) => _$ProductModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$ProductModelToJson(this);
 }

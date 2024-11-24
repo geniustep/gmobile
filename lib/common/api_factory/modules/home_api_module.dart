@@ -13,7 +13,7 @@ resPartnerApi({required OnResponse<PartnerModel> onResponse}) {
       ["name", "email", "phone"]
     ],
     // domain: [],
-    // fields: ["name", "email", "image_512"],
+    // fields: ["name", "email", "image_128"],
     onResponse: (response) {
       var res = PartnerModel.fromJson(response);
       print(res);

@@ -16,7 +16,7 @@ ProductModel _$ProductModelFromJson(Map<String, dynamic> json) => ProductModel(
       volume: json['volume'],
       weight: json['weight'],
       packaging_ids: json['packaging_ids'],
-      image_512: json['image_512'],
+      image_128: json['image_128'],
       write_date: json['write_date'],
       display_name: json['display_name'],
       create_uid: json['create_uid'],
@@ -29,8 +29,7 @@ ProductModel _$ProductModelFromJson(Map<String, dynamic> json) => ProductModel(
       sales_count: json['sales_count'],
     );
 
-Map<String, dynamic> _$ProductModelToJson(ProductModel instance) =>
-    <String, dynamic>{
+Map<String, dynamic> _$ProductModelToJson(ProductModel instance) => <String, dynamic>{
       'id': instance.id,
       'lst_price': instance.lst_price,
       'active': instance.active,
@@ -40,7 +39,7 @@ Map<String, dynamic> _$ProductModelToJson(ProductModel instance) =>
       'volume': instance.volume,
       'weight': instance.weight,
       'packaging_ids': instance.packaging_ids,
-      'image_512': instance.image_512,
+      'image_128': instance.image_128,
       'write_date': instance.write_date,
       'display_name': instance.display_name,
       'create_uid': instance.create_uid,

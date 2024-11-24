@@ -76,8 +76,7 @@ class _ProductsState extends State<Products> with TickerProviderStateMixin {
         // productsFiltry[element.id] = element;
         producto.add(element);
       }
-      controller = TabController(
-          length: prdtCategory.length, vsync: this, initialIndex: 0);
+      controller = TabController(length: prdtCategory.length, vsync: this, initialIndex: 0);
       controller!.addListener(onPositionChange);
     });
 
@@ -145,8 +144,7 @@ class _ProductsState extends State<Products> with TickerProviderStateMixin {
       //   producto.add(element);
       // }
 
-      controller = TabController(
-          length: prdtCategory.length, vsync: this, initialIndex: 0);
+      controller = TabController(length: prdtCategory.length, vsync: this, initialIndex: 0);
     });
 
     // List<dynamic> domain = [
@@ -195,10 +193,7 @@ class _ProductsState extends State<Products> with TickerProviderStateMixin {
         //   producto.add(element);
         // }
 
-        controller = TabController(
-            length: prdtCategory.length,
-            vsync: this,
-            initialIndex: controller!.index);
+        controller = TabController(length: prdtCategory.length, vsync: this, initialIndex: controller!.index);
         controller!.addListener(onPositionChange);
       });
     }
@@ -257,8 +252,7 @@ class _ProductsState extends State<Products> with TickerProviderStateMixin {
                         // filter = '';
                       });
                     },
-                    child:
-                        Icon(isVisible == false ? Icons.search : Icons.close)),
+                    child: Icon(isVisible == false ? Icons.search : Icons.close)),
               ),
             ],
           )
@@ -280,30 +274,55 @@ class _ProductsState extends State<Products> with TickerProviderStateMixin {
         // ),
         child: ListView.builder(
             shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
             itemCount: PrefUtils.products.length,
             itemBuilder: (_, i) {
               var p = PrefUtils.products[i];
-              return p.image_512 != false
-                  ? ImageGet(p.image_512)
-                  : Icon(
-                      Icons.no_photography,
-                      color: AppColors.blue,
-                      size: 300,
-                    );
+              return buildImageWidget(p.image_128);
             }));
   }
 
   List<ProductModel> getProduct() {
     setState(() {});
-    var result = producto
-        .where((element) => (element.name)
-            .toString()
-            .toLowerCase()
-            .contains(filter.toLowerCase()))
-        .toList();
+    var result = producto.where((element) => (element.name).toString().toLowerCase().contains(filter.toLowerCase())).toList();
     print(result.length);
     return result;
+  }
+
+  Widget buildImageWidget(dynamic imageData) {
+    if (imageData is String && imageData.isNotEmpty) {
+      Uint8List? imageBytes = decodeBase64Image(imageData);
+      if (imageBytes != null) {
+        return Image.memory(
+          imageBytes,
+          width: 300,
+          height: 300,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return const Icon(
+              Icons.broken_image,
+              color: Colors.red,
+              size: 300,
+            );
+          },
+        );
+      }
+    }
+
+    return const Icon(
+      Icons.no_photography,
+      color: Colors.blue,
+      size: 300,
+    );
+  }
+
+  Uint8List? decodeBase64Image(String base64String) {
+    try {
+      return base64Decode(base64String);
+    } catch (e) {
+      print("Error al decodificar la imagen: $e");
+      return null;
+    }
   }
 }
 

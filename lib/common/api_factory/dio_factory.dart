@@ -59,6 +59,7 @@ class DioFactory {
         headers: {
           HttpHeaders.userAgentHeader: _deviceName,
           HttpHeaders.authorizationHeader: _authorization,
+          'Connection': 'Keep-Alive',
           'Keep-Alive': 'timeout=120, max=1000',
         },
         connectTimeout: const Duration(seconds: 60),

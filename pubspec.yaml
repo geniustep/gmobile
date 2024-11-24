@@ -1,10 +1,10 @@
 name: gsloution_mobile
 description: "A new Flutter project."
-publish_to: 'none'
+publish_to: "none"
 version: 0.1.0
 
 environment:
-  sdk: ^3.5.1
+  sdk: ^3.5.0
 
 dependencies:
   flutter_localizations:
@@ -27,7 +27,7 @@ dependencies:
   google_fonts: ^6.2.1
   build_runner: ^2.4.13
   json_serializable: ^6.9.0
-  
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

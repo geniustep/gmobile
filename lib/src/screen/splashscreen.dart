@@ -54,19 +54,14 @@ class _SplashScreenAppState extends State<SplashScreenApp> {
       await _controller.getProductsController(
         onResponse: (resProducts) async {
           if (resProducts != null && resProducts.isNotEmpty) {
-            var firstKey = resProducts.keys.toList()[0];
-            if (firstKey != null && resProducts[firstKey] != null) {
-              products.addAll(resProducts[firstKey]!);
-              await PrefUtils.setProducts(products);
-              setState(() {
-                progress = 100;
-                isReady = true;
-              });
-            } else {
-              print('Error: Invalid key or null data in resProducts');
-            }
+            products.addAll(resProducts);
+            await PrefUtils.setProducts(products);
+            setState(() {
+              progress = 100;
+              isReady = true;
+            });
           } else {
-            print('Error: resProducts is null or empty');
+            print('Error: Invalid key or null data in resProducts');
           }
         },
       );
