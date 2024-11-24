@@ -7,6 +7,7 @@
 .atom/
 .buildlog/
 .history
+.metadata
 .svn/
 migrate_working_dir/
 
@@ -30,6 +31,7 @@ migrate_working_dir/
 .pub-cache/
 .pub/
 /build/
+/test/
 
 # Symbolication related
 app.*.symbols
@@ -45,3 +47,6 @@ app.*.map.json
 # FVM Version Cache
 .fvm/
 .fvmrc
+test/widget_test.dart
+android/app/src/main/kotlin/com/example/gmobile/MainActivity.kt
+.gitignore

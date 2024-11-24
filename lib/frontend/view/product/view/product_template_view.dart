@@ -76,7 +76,8 @@ class _ProductsState extends State<Products> with TickerProviderStateMixin {
         // productsFiltry[element.id] = element;
         producto.add(element);
       }
-      controller = TabController(length: prdtCategory.length, vsync: this, initialIndex: 0);
+      controller = TabController(
+          length: prdtCategory.length, vsync: this, initialIndex: 0);
       controller!.addListener(onPositionChange);
     });
 
@@ -144,7 +145,8 @@ class _ProductsState extends State<Products> with TickerProviderStateMixin {
       //   producto.add(element);
       // }
 
-      controller = TabController(length: prdtCategory.length, vsync: this, initialIndex: 0);
+      controller = TabController(
+          length: prdtCategory.length, vsync: this, initialIndex: 0);
     });
 
     // List<dynamic> domain = [
@@ -193,7 +195,10 @@ class _ProductsState extends State<Products> with TickerProviderStateMixin {
         //   producto.add(element);
         // }
 
-        controller = TabController(length: prdtCategory.length, vsync: this, initialIndex: controller!.index);
+        controller = TabController(
+            length: prdtCategory.length,
+            vsync: this,
+            initialIndex: controller!.index);
         controller!.addListener(onPositionChange);
       });
     }
@@ -241,7 +246,9 @@ class _ProductsState extends State<Products> with TickerProviderStateMixin {
                   ),
                 ),
               ),
-              Visibility(visible: !isVisible, child: Text('Products List')),
+              Visibility(
+                  visible: !isVisible,
+                  child: Text('Products ${PrefUtils.products.length}')),
               SizedBox(
                 width: 40,
                 height: 40,
@@ -252,7 +259,8 @@ class _ProductsState extends State<Products> with TickerProviderStateMixin {
                         // filter = '';
                       });
                     },
-                    child: Icon(isVisible == false ? Icons.search : Icons.close)),
+                    child:
+                        Icon(isVisible == false ? Icons.search : Icons.close)),
               ),
             ],
           )
@@ -265,26 +273,112 @@ class _ProductsState extends State<Products> with TickerProviderStateMixin {
         ),
         drawer: CustomDrawer(),
         appBarTitle: "products",
-        // appBarBottom: TabBar(
-        //   isScrollable: true,
-        //   controller: controller,
-        //   tabs: List<Widget>.generate(prdtCategory.length, (index) {
-        //     return Tab(text: prdtCategory[index]);
-        //   }),
-        // ),
+        appBarBottom: TabBar(
+          isScrollable: true,
+          controller: controller,
+          tabs: List<Widget>.generate(prdtCategory.length, (index) {
+            return Tab(text: prdtCategory[index]);
+          }),
+        ),
         child: ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: PrefUtils.products.length,
             itemBuilder: (_, i) {
               var p = PrefUtils.products[i];
-              return buildImageWidget(p.image_128);
+              return Card(
+                margin: const EdgeInsets.all(8.0),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      p.image_128 != false
+                          ? ImageGet(p.image_128)
+                          : const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: SizedBox(
+                                height: 200,
+                                width: 200,
+                                child: Icon(
+                                  Icons.no_photography,
+                                  color: AppColors.blue,
+                                  size: 100,
+                                ),
+                              ),
+                            ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                p.name,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 5),
+                              Text(
+                                p.description != false ? p.description : p.name,
+                                style: const TextStyle(
+                                    fontSize: 14, color: Colors.grey),
+                              ),
+                              const SizedBox(height: 10),
+                              Text(
+                                'Sale Count: ${p.sales_count.toString()}',
+                                style: const TextStyle(
+                                    fontSize: 14, color: Colors.black),
+                              ),
+                              const SizedBox(height: 5),
+                              Text(
+                                '\$${p.lst_price.toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              ElevatedButton(
+                                onPressed: () {
+                                  _handleBuyButton(context, p);
+                                },
+                                child: const Text('Buy'),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
             }));
+  }
+
+  void _handleBuyButton(BuildContext context, ProductModel product) {
+    // This is where you can handle the buy action
+    // For example, show a snackbar or navigate to a new page
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('You bought ${product.name} for \$${product.lst_price}!'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   List<ProductModel> getProduct() {
     setState(() {});
-    var result = producto.where((element) => (element.name).toString().toLowerCase().contains(filter.toLowerCase())).toList();
+    var result = producto
+        .where((element) => (element.name)
+            .toString()
+            .toLowerCase()
+            .contains(filter.toLowerCase()))
+        .toList();
     print(result.length);
     return result;
   }
@@ -345,44 +439,36 @@ class ImageGet extends StatelessWidget {
     if (isValidBase64(image)) {
       try {
         Uint8List imageBytes = base64.decode(image);
-        return Dialog(
+        return Padding(
+          padding: const EdgeInsets.all(8.0),
           child: Image.memory(
             imageBytes,
-            height: 300,
-            width: 300,
+            height: 200,
+            width: 200,
             fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) {
+              return _errorWidget();
+            },
           ),
         );
       } catch (e) {
-        return _errorWidget("Invalid image data");
+        return _errorWidget();
       }
     } else {
-      return _errorWidget("Invalid Base64 string");
+      return _errorWidget();
     }
   }
 
-  Widget _errorWidget(String message) {
-    return Dialog(
-      child: Container(
-        alignment: Alignment.center,
-        width: 300,
-        height: 300,
-        color: Colors.grey[200],
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.error,
-              color: Colors.red,
-              size: 60,
-            ),
-            const SizedBox(height: 10),
-            Text(
-              message,
-              style: const TextStyle(fontSize: 16, color: Colors.black),
-              textAlign: TextAlign.center,
-            ),
-          ],
+  Widget _errorWidget() {
+    return const Padding(
+      padding: EdgeInsets.all(8),
+      child: SizedBox(
+        height: 200,
+        width: 200,
+        child: Icon(
+          Icons.no_photography,
+          color: AppColors.blue,
+          size: 100,
         ),
       ),
     );
