@@ -4,9 +4,12 @@ class Config {
   Config._();
 
   ///Odoo URLs
-  static const String OdooDevURL = "http://207.154.252.42:8069/";
-  static const String OdooProdURL = "http://207.154.252.42:8069/";
-  static const String OdooUATURL = "http://207.154.252.42:8069/";
+  static const String odooDevURL = "https://app.propanel.ma/";
+  static const String odooProdURL = "https://app.propanel.ma/";
+  static const String odooUATURL = "https://app.propanel.ma/";
+  // static const String odooDevURL = "http://207.154.252.42:8069/";
+  // static const String odooProdURL = "http://207.154.252.42:8069/";
+  // static const String odooUATURL = "http://207.154.252.42:8069/";
 
   /// SelfSignedCert:
   static const selfSignedCert = false;
@@ -27,7 +30,7 @@ class Config {
   static const actionLocale = 'locale';
   static const int SIGNUP = 0;
   static const int SIGNIN = 1;
-  static const String CURRENCY_SYMBOL = "€";
+  static const String CURRENCY_SYMBOL = "Dh";
   static String FCM_TOKEN = "";
-  static String dataBase = "zaka";
+  static String dataBase = "done2026";
 }

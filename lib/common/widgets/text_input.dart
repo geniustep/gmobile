@@ -14,7 +14,7 @@ class TextInput extends StatelessWidget {
       prefixText,
       suffixText;
   Widget? prefix, suffix;
-  int? maxLength;
+  dynamic maxLength;
   bool? isPassword, countryCodeEnabled, isEnabled;
   bool? isSimpleField;
   BorderRadius? borderRadius;
@@ -24,27 +24,28 @@ class TextInput extends StatelessWidget {
   OnFieldSubmitted? onFieldSubmitted;
   FocusNode? focusNode;
 
-  TextInput(
-      {this.validationMsg,
-      required this.controller,
-      this.helperText,
-      this.suffixText,
-      this.prefixText,
-      this.prefix,
-      this.labelText,
-      this.hintText,
-      this.suffix,
-      this.textInputType,
-      this.isPassword,
-      this.maxLength,
-      this.countryCodeEnabled,
-      this.borderRadius,
-      this.isSimpleField,
-      this.onChangeCountryCode,
-      this.textInputAction,
-      this.onFieldSubmitted,
-      this.focusNode,
-      this.isEnabled});
+  TextInput({
+    this.validationMsg,
+    required this.controller,
+    this.helperText,
+    this.suffixText,
+    this.prefixText,
+    this.prefix,
+    this.labelText,
+    this.hintText,
+    this.suffix,
+    this.textInputType,
+    this.isPassword,
+    this.maxLength,
+    this.countryCodeEnabled,
+    this.borderRadius,
+    this.isSimpleField,
+    this.onChangeCountryCode,
+    this.textInputAction,
+    this.onFieldSubmitted,
+    this.focusNode,
+    this.isEnabled,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -116,9 +117,7 @@ class TextInput extends StatelessWidget {
               ),
               border: OutlineInputBorder(
                 borderRadius: borderRadius ?? BorderRadius.circular(5.0),
-                borderSide: BorderSide(
-                  width: 1,
-                ),
+                borderSide: BorderSide(width: 1),
               ),
               hintStyle: TextStyle(
                 fontSize: 17,

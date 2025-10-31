@@ -1,16 +1,51 @@
 import 'dart:async';
-
 import 'package:gsloution_mobile/common/config/import.dart';
 
 class Module {
   Module._();
 
+  // generer les recordes
+  static Future<void> getRecordsController<T>({
+    required String model, // Modelo genérico (ej. "product.product")
+    List<String>? fields, // Campos opcionales
+    List domain = const [], // Dominio opcional
+    int limit = 50, // Límite de registros por defecto
+    int offset = 0, // Offset por defecto
+    T Function(Map<String, dynamic>)?
+    fromJson, // Función para convertir JSON a modelo
+    OnResponse? onResponse, // Callback para manejar la respuesta
+    bool? showGlobalLoading, // ✅ nullable parameter
+  }) async {
+    try {
+      List<String> dynamicFields = await getValidFields(model);
+
+      List<String> validFields = [...?fields, ...dynamicFields];
+      // generateModelFiles(validFields, model);
+      final fetchedRecords = await searchRead<T>(
+        model: model,
+        domain: domain,
+        fields: validFields,
+        fromJson: fromJson, // Conversión específica para el modelo
+        limit: limit,
+        showGlobalLoading: showGlobalLoading, // ✅ تمرير parameter
+      );
+
+      if (onResponse != null) {
+        onResponse(fetchedRecords);
+      }
+    } catch (e) {
+      print("Error obteniendo registros: $e");
+    }
+  }
+
   static Future<List<T>> searchRead<T>({
     required String model, // Modelo genérico (por ejemplo, "product.product").
     required List domain, // Dominio para filtrar registros.
     required List<String> fields, // Campos que deseas recuperar.
-    T Function(Map<String, dynamic>)? fromJson, // Función de conversión de JSON.
+    T Function(Map<String, dynamic>)?
+    fromJson, // Función de conversión de JSON.
     int limit = 50, // Límite por página.
+    bool? showGlobalLoading, // ✅ nullable parameter
   }) async {
     int offset = 0;
     bool hasMore = true;
@@ -23,10 +58,7 @@ class Module {
         method: 'search_read',
         model: model,
         args: [domain, fields],
-        kwargs: {
-          "limit": limit,
-          "offset": offset,
-        },
+        kwargs: {"limit": limit, "offset": offset},
         onResponse: (response) {
           if (response is List) {
             List<T> fetchedRecords = [];
@@ -45,6 +77,7 @@ class Module {
           print("Data: $data");
           completer.completeError(error);
         },
+        showGlobalLoading: showGlobalLoading, // ✅ تمرير parameter
       );
 
       final response = await completer.future;
@@ -76,7 +109,10 @@ class Module {
       },
       onResponse: (response) {
         if (response is Map<String, dynamic>) {
-          List<String> requiredFields = response.entries.where((entry) => entry.value['required'] == true).map((entry) => entry.key).toList();
+          List<String> requiredFields = response.entries
+              .where((entry) => entry.value['required'] == true)
+              .map((entry) => entry.key)
+              .toList();
           completer.complete(requiredFields);
         }
       },
@@ -87,5 +123,76 @@ class Module {
     );
 
     return completer.future;
+  }
+
+  static addModule({
+    required String model,
+    required dynamic maps,
+    required OnResponse onResponse,
+  }) async {
+    Api.create(
+      model: model,
+      values: maps!,
+      onResponse: (response) {
+        onResponse(response);
+      },
+      onError: (error, data) {
+        handleApiError(error);
+      },
+    );
+  }
+
+  static createModule({
+    required String model,
+    required dynamic maps,
+    required OnResponse onResponse,
+    bool? showGlobalLoading,
+  }) async {
+    Api.create(
+      showGlobalLoading: showGlobalLoading,
+      model: model,
+      values: maps!,
+      onResponse: (response) {
+        onResponse(response);
+      },
+      onError: (error, data) {
+        handleApiError(error);
+      },
+    );
+  }
+
+  static writeModule({
+    required String model,
+    required List<int> ids,
+    required Map<String, dynamic> values,
+    required OnResponse onResponse,
+  }) async {
+    Api.write(
+      model: model,
+      ids: ids,
+      values: values,
+      onResponse: (response) {
+        onResponse(response);
+      },
+      onError: (error, data) {
+        handleApiError(error);
+      },
+    );
+  }
+
+  static deleteModule({
+    required String model,
+    required List<int> ids,
+    required Map values,
+    required OnResponse onResponse,
+  }) async {
+    Api.unlink(
+      model: model,
+      ids: ids,
+      onResponse: onResponse,
+      onError: (error, data) {
+        handleApiError(error);
+      },
+    );
   }
 }

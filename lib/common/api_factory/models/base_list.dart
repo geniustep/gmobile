@@ -1,16 +1,12 @@
 class BaseListModel {
-  int? id;
+  dynamic id;
   String? name;
   bool isSelected = false;
 
   BaseListModel({this.id, this.name, this.isSelected = false});
 
   factory BaseListModel.fromJson(Map<String, dynamic> json) {
-    return BaseListModel(
-      id: json['id'],
-      name: json['name'],
-      isSelected: false,
-    );
+    return BaseListModel(id: json['id'], name: json['name'], isSelected: false);
   }
 
   Map<String, dynamic> toJson() {

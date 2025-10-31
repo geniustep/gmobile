@@ -21,28 +21,28 @@ extension MyString on String {
 
   String get setChatId => (this.trim() == "") ? this : 'c$this';
 
-  int? get toInt => this.trim() == "" ? null : int.parse(this);
+  dynamic get toInt => this.trim() == "" ? null : int.parse(this);
 
   Image image({color = Color}) {
-    return Image.asset(
-      this,
-      color: color,
-    );
+    return Image.asset(this, color: color);
   }
 
-  CachedNetworkImage cachedImage(
-          {double? height, double? width, BoxFit? fit, String? placeholder}) =>
-      CachedNetworkImage(
-        fit: fit ?? BoxFit.fill,
-        height: height ?? 20.0,
-        width: width ?? 20.0,
-        imageUrl: this,
-        progressIndicatorBuilder: (context, url, downloadProgress) =>
-            CircularProgressIndicator(value: downloadProgress.progress),
-        errorWidget: (context, url, error) => placeholder != null
-            ? Image.asset(placeholder, fit: BoxFit.fill)
-            : Icon(Icons.error),
-      );
+  CachedNetworkImage cachedImage({
+    double? height,
+    double? width,
+    BoxFit? fit,
+    String? placeholder,
+  }) => CachedNetworkImage(
+    fit: fit ?? BoxFit.fill,
+    height: height ?? 20.0,
+    width: width ?? 20.0,
+    imageUrl: this,
+    progressIndicatorBuilder: (context, url, downloadProgress) =>
+        CircularProgressIndicator(value: downloadProgress.progress),
+    errorWidget: (context, url, error) => placeholder != null
+        ? Image.asset(placeholder, fit: BoxFit.fill)
+        : Icon(Icons.error),
+  );
 
   String setKVal() {
     return '$this k';
@@ -65,10 +65,10 @@ extension MyInt on int {
   bool get boolType => this == 0 ? false : true;
 
   String get setDigit => NumberFormat.compactCurrency(
-        decimalDigits: 0,
-        symbol:
-            '', // if you want to add currency symbol then pass that in this else leave it empty.
-      ).format(this ?? 0);
+    decimalDigits: 0,
+    symbol:
+        '', // if you want to add currency symbol then pass that in this else leave it empty.
+  ).format(this ?? 0);
 
   String get setMonths => (this != null)
       ? this.toString() + ' months'

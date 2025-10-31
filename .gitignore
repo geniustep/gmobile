@@ -1,52 +1,73 @@
-# Miscellaneous
-*.class
-*.log
-*.pyc
-*.swp
-.DS_Store
-.atom/
-.buildlog/
-.history
-.metadata
-.svn/
-migrate_working_dir/
-
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
-.idea/
-
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
+# ════════════════════════════════════════════════════════
+# Flutter & Dart
+# ════════════════════════════════════════════════════════
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
+.packages
 .pub-cache/
 .pub/
-/build/
-/test/
+build/
 
-# Symbolication related
-app.*.symbols
+# ════════════════════════════════════════════════════════
+# IDE
+# ════════════════════════════════════════════════════════
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+*.swp
 
-# Obfuscation related
-app.*.map.json
+# ════════════════════════════════════════════════════════
+# Platform Folders (احتفظ بملفات الإعداد فقط)
+# ════════════════════════════════════════════════════════
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
+# Android - احذف كل شيء ماعدا الإعدادات المهمة
+android/
+!android/app/
+!android/app/build.gradle
+!android/app/src/
+!android/build.gradle
+!android/settings.gradle
+!android/gradle.properties
 
-# FVM Version Cache
-.fvm/
-.fvmrc
-test/widget_test.dart
-android/app/src/main/kotlin/com/example/gmobile/MainActivity.kt
-.gitignore
+# iOS - احذف كل شيء ماعدا الإعدادات
+ios/
+!ios/Runner/
+!ios/Runner.xcodeproj/
+!ios/Runner.xcworkspace/
+!ios/Podfile
+
+# Web - احتفظ بالإعدادات فقط
+web/
+!web/index.html
+!web/manifest.json
+
+# Windows - احذف كامل
+windows/
+
+# Linux - احذف كامل  
+linux/
+
+# macOS - احذف كامل
+macos/
+
+# ════════════════════════════════════════════════════════
+# Metadata
+# ════════════════════════════════════════════════════════
+.metadata
+
+# ════════════════════════════════════════════════════════
+# Temp & Archives
+# ════════════════════════════════════════════════════════
+*.zip
+*.tar.gz
+temp*/
+cache/
+
+# ════════════════════════════════════════════════════════
+# Misc
+# ════════════════════════════════════════════════════════
+*.log
+.DS_Store

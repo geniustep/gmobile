@@ -5,10 +5,14 @@ class PartnerModel {
 
   PartnerModel.fromJson(dynamic json) {
     if (json is Map<String, dynamic> && json["records"] is List) {
-      records = (json["records"] as List).map((v) => Records.fromJson(v as Map<String, dynamic>)).toList();
+      records = (json["records"] as List)
+          .map((v) => Records.fromJson(v as Map<String, dynamic>))
+          .toList();
     } else if (json is List) {
       // إذا كان الجيسون عبارة عن قائمة مباشرة
-      records = json.map((v) => Records.fromJson(v as Map<String, dynamic>)).toList();
+      records = json
+          .map((v) => Records.fromJson(v as Map<String, dynamic>))
+          .toList();
     } else {
       records = [];
     }
@@ -24,7 +28,7 @@ class PartnerModel {
 }
 
 class Records {
-  int? id;
+  dynamic id;
   String? name;
   String? email;
   String? image512;
@@ -34,8 +38,12 @@ class Records {
   Records.fromJson(Map<String, dynamic> json) {
     id = json["id"]; // تعيين قيمة افتراضية عند عدم وجود المفتاح
     name = json["name"] ?? ""; // تعيين قيمة افتراضية عند عدم وجود المفتاح
-    email = (json["email"] is! bool) ? json["email"] ?? "" : ""; // معالجة القيم غير المتوقعة
-    image512 = (json["image_128"] is! bool) ? json["image_128"] ?? "" : ""; // معالجة القيم غير المتوقعة
+    email = (json["email"] is! bool)
+        ? json["email"] ?? ""
+        : ""; // معالجة القيم غير المتوقعة
+    image512 = (json["image_128"] is! bool)
+        ? json["image_128"] ?? ""
+        : ""; // معالجة القيم غير المتوقعة
   }
 
   Map<String, dynamic> toJson() {

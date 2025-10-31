@@ -8,10 +8,10 @@ import 'package:gsloution_mobile/common/config/app_colors.dart';
 import 'package:gsloution_mobile/common/config/app_fonts.dart';
 import 'package:gsloution_mobile/common/config/config.dart';
 import 'package:gsloution_mobile/common/config/localization/translations.dart';
-import 'package:gsloution_mobile/routes.dart';
-import 'package:gsloution_mobile/src/authentication/views/signin.dart';
-import 'package:gsloution_mobile/src/screen/homepage.dart';
-import 'package:gsloution_mobile/src/screen/splashscreen.dart';
+import 'package:gsloution_mobile/src/routes/app_routes.dart';
+
+/// Global navigator key for the application
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 /// Main App Widget responsible for initializing the application.
 class App extends StatefulWidget {
@@ -61,7 +61,10 @@ class _AppState extends State<App> {
         GlobalWidgetsLocalizations.delegate,
       ],
       supportedLocales: Config.supportedLocales,
-      home: widget.isLoggedIn ? const SplashScreenApp() : SignIn(),
+      navigatorKey: navigatorKey,
+      initialRoute: widget.isLoggedIn
+          ? AppRoutes.splashScreen
+          : AppRoutes.login,
     );
   }
 

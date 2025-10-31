@@ -16,22 +16,22 @@ class VersionInfoResponse {
   String? serverVersion;
   List<dynamic>? serverVersionInfo;
   String? serverSerie;
-  int? protocolVersion;
+  dynamic protocolVersion;
 
   factory VersionInfoResponse.fromJson(Map<String, dynamic> json) =>
       VersionInfoResponse(
         serverVersion: json["server_version"] ?? '',
-        serverVersionInfo:
-            List<dynamic>.from(json["server_version_info"].map((x) => x)),
+        serverVersionInfo: List<dynamic>.from(
+          json["server_version_info"].map((x) => x),
+        ),
         serverSerie: json["server_serie"] ?? '',
         protocolVersion: json["protocol_version"] ?? 0,
       );
 
   Map<String, dynamic> toJson() => {
-        "server_version": serverVersion,
-        "server_version_info":
-            List<dynamic>.from(serverVersionInfo!.map((x) => x)),
-        "server_serie": serverSerie,
-        "protocol_version": protocolVersion,
-      };
+    "server_version": serverVersion,
+    "server_version_info": List<dynamic>.from(serverVersionInfo!.map((x) => x)),
+    "server_serie": serverSerie,
+    "protocol_version": protocolVersion,
+  };
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:gsloution_mobile/common/api_factory/modules/authentication_module.dart';
 import 'package:gsloution_mobile/common/config/app_colors.dart';
+import 'package:gsloution_mobile/common/config/config.dart';
 import 'package:gsloution_mobile/common/config/localization/localize.dart';
 import 'package:gsloution_mobile/common/utils/utils.dart';
 import 'package:gsloution_mobile/common/widgets/custom_button.dart';
@@ -9,6 +10,8 @@ import 'package:gsloution_mobile/common/widgets/main_container.dart';
 import 'package:gsloution_mobile/common/widgets/text_input.dart';
 
 class SignIn extends StatefulWidget {
+  const SignIn({super.key});
+
   @override
   _SignInState createState() => _SignInState();
 }
@@ -66,7 +69,8 @@ class _SignInState extends State<SignIn> {
                 } else if (_passCtrl.text.isEmpty) {
                   showWarning("Please enter password");
                 } else {
-                  authenticationAPI(_emailController.text, _passCtrl.text);
+                  authenticationAPI(
+                      _emailController.text, _passCtrl.text);
                 }
               },
               child: Text(

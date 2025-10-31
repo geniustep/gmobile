@@ -1,7 +1,7 @@
 class BaseResponse {
   dynamic result;
   List? error;
-  int? success;
+  dynamic success;
 
   BaseResponse({this.result, this.error, this.success});
 

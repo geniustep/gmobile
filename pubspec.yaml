@@ -4,7 +4,7 @@ publish_to: "none"
 version: 0.1.0
 
 environment:
-  sdk: ^3.5.0
+  sdk: ^3.8.0
 
 dependencies:
   flutter_localizations:
@@ -13,8 +13,8 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.8
-  intl: ^0.19.0
-  device_info_plus: ^11.0.0
+  intl: ^0.20.2
+  device_info_plus: ^12.1.0
   dio: ^5.7.0
   shared_preferences: ^2.3.2
   get: ^4.6.6
@@ -23,17 +23,51 @@ dependencies:
   uuid: ^4.5.1
   country_code_picker: ^3.1.0
   cached_network_image: ^3.4.1
-  flutter_form_builder: ^9.5.0
+  flutter_form_builder: ^10.2.0
   google_fonts: ^6.2.1
   build_runner: ^2.4.13
   json_serializable: ^6.9.0
-
+  mobile_scanner: ^7.0.1
+  image_picker: ^1.1.2
+  grouped_list: ^6.0.0
+  form_builder_image_picker: ^4.1.0
+  flutter_onboarding_slider: ^1.0.11
+  flutter_svg: ^2.0.9
+  carousel_slider: ^5.0.0
+  fl_chart: ^1.1.1
+  sidebarx: ^0.17.2
+  cherry_toast: ^1.8.0
+  flutter_rounded_date_picker: ^3.0.4
+  card_slider: ^1.0.5
+  expansion_tile_card: ^3.0.0
+  flutter_easy_faq: ^1.0.1
+  pdf: ^3.10.8
+  printing: ^5.12.0
+  path_provider: ^2.1.2
+  win32: ^5.9.0
+  google_maps_flutter: ^2.10.0
+  geolocator: ^14.0.2
+  geocoding: ^4.0.0
+  form_builder_validators: ^11.0.0
+  floating_action_bubble: ^1.1.4
+  dropdown_search: ^6.0.1
+  rename_app: ^1.6.1
+ 
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^4.0.0
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.2
+
+flutter_launcher_icons:
+  image_path: "assets/images/logo/icon.png"
+  android: true
+  ios: true
 
 flutter:
+  uses-material-design: true
+
   fonts:
     - family: RobotoBlack
       fonts:
@@ -71,6 +105,16 @@ flutter:
     - family: RobotoThinItalic
       fonts:
         - asset: assets/fonts/Roboto-ThinItalic.ttf
-  uses-material-design: true
+
   assets:
     - assets/images/
+    - assets/images/onboarding/
+    - assets/images/logo/
+    - assets/icons/icon_image/
+    - assets/images/avatar/
+    - assets/icons/icon_svg/
+    - assets/images/offer/
+    - assets/images/products/
+    - assets/images/other/
+    - assets/images/logo/icon.png
+    - assets/images/offer/banner.png
