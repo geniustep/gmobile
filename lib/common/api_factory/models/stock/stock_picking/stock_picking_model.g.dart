@@ -162,27 +162,27 @@ Map<String, dynamic> _$StockPickingModelToJson(StockPickingModel instance) =>
     };
 
 StockImmediatTransfer _$StockImmediatTransferFromJson(
-  Map<String, dynamic> json,
-) => StockImmediatTransfer(
-  id: json['id'],
-  lastUpdate: json['__last_update'],
-  createDate: json['create_date'],
-  createUid: json['create_uid'],
-  displayName: json['display_name'] as String?,
-  pickIds: json['pick_ids'],
-  writeDate: json['write_date'],
-  writeUid: json['write_uid'],
-);
+        Map<String, dynamic> json) =>
+    StockImmediatTransfer(
+      id: json['id'],
+      lastUpdate: json['__last_update'],
+      createDate: json['create_date'],
+      createUid: json['create_uid'],
+      displayName: json['display_name'] as String?,
+      pickIds: json['pick_ids'],
+      writeDate: json['write_date'],
+      writeUid: json['write_uid'],
+    );
 
 Map<String, dynamic> _$StockImmediatTransferToJson(
-  StockImmediatTransfer instance,
-) => <String, dynamic>{
-  'id': instance.id,
-  '__last_update': instance.lastUpdate,
-  'create_date': instance.createDate,
-  'create_uid': instance.createUid,
-  'display_name': instance.displayName,
-  'pick_ids': instance.pickIds,
-  'write_date': instance.writeDate,
-  'write_uid': instance.writeUid,
-};
+        StockImmediatTransfer instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      '__last_update': instance.lastUpdate,
+      'create_date': instance.createDate,
+      'create_uid': instance.createUid,
+      'display_name': instance.displayName,
+      'pick_ids': instance.pickIds,
+      'write_date': instance.writeDate,
+      'write_uid': instance.writeUid,
+    };

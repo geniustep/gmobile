@@ -235,35 +235,35 @@ Map<String, dynamic> _$AccountMoveModelToJson(AccountMoveModel instance) =>
     };
 
 SalesAdvancePaymentInvoice _$SalesAdvancePaymentInvoiceFromJson(
-  Map<String, dynamic> json,
-) => SalesAdvancePaymentInvoice(
-  id: json['id'],
-  count: json['count'],
-  advancePaymentMethod: json['advance_payment_method'],
-  hasDownPayments: json['has_down_payments'],
-  deductDownPayments: json['deduct_down_payments'],
-  productId: json['product_id'],
-  currencyId: json['currency_id'],
-  fixedAmount: json['fixed_amount'],
-  amount: json['amount'],
-  depositAccountId: json['deposit_account_id'],
-  depositTaxesId: json['deposit_taxes_id'],
-  displayName: json['display_name'],
-);
+        Map<String, dynamic> json) =>
+    SalesAdvancePaymentInvoice(
+      id: json['id'],
+      count: json['count'],
+      advancePaymentMethod: json['advance_payment_method'],
+      hasDownPayments: json['has_down_payments'],
+      deductDownPayments: json['deduct_down_payments'],
+      productId: json['product_id'],
+      currencyId: json['currency_id'],
+      fixedAmount: json['fixed_amount'],
+      amount: json['amount'],
+      depositAccountId: json['deposit_account_id'],
+      depositTaxesId: json['deposit_taxes_id'],
+      displayName: json['display_name'],
+    );
 
 Map<String, dynamic> _$SalesAdvancePaymentInvoiceToJson(
-  SalesAdvancePaymentInvoice instance,
-) => <String, dynamic>{
-  'id': instance.id,
-  'count': instance.count,
-  'advance_payment_method': instance.advancePaymentMethod,
-  'has_down_payments': instance.hasDownPayments,
-  'deduct_down_payments': instance.deductDownPayments,
-  'product_id': instance.productId,
-  'currency_id': instance.currencyId,
-  'fixed_amount': instance.fixedAmount,
-  'amount': instance.amount,
-  'deposit_account_id': instance.depositAccountId,
-  'deposit_taxes_id': instance.depositTaxesId,
-  'display_name': instance.displayName,
-};
+        SalesAdvancePaymentInvoice instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'count': instance.count,
+      'advance_payment_method': instance.advancePaymentMethod,
+      'has_down_payments': instance.hasDownPayments,
+      'deduct_down_payments': instance.deductDownPayments,
+      'product_id': instance.productId,
+      'currency_id': instance.currencyId,
+      'fixed_amount': instance.fixedAmount,
+      'amount': instance.amount,
+      'deposit_account_id': instance.depositAccountId,
+      'deposit_taxes_id': instance.depositTaxesId,
+      'display_name': instance.displayName,
+    };

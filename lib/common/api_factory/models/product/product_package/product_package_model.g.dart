@@ -19,14 +19,14 @@ ProductPackageModel _$ProductPackageModelFromJson(Map<String, dynamic> json) =>
     );
 
 Map<String, dynamic> _$ProductPackageModelToJson(
-  ProductPackageModel instance,
-) => <String, dynamic>{
-  'name': instance.name,
-  'display_name': instance.displayName,
-  'id': instance.id,
-  'qty': instance.qty,
-  'product_uom_id': instance.productUomId,
-  'product_id': instance.productId,
-  'barcode': instance.barcode,
-  'company_id': instance.companyId,
-};
+        ProductPackageModel instance) =>
+    <String, dynamic>{
+      'name': instance.name,
+      'display_name': instance.displayName,
+      'id': instance.id,
+      'qty': instance.qty,
+      'product_uom_id': instance.productUomId,
+      'product_id': instance.productId,
+      'barcode': instance.barcode,
+      'company_id': instance.companyId,
+    };

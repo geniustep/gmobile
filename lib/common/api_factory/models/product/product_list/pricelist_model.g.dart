@@ -28,11 +28,16 @@ Map<String, dynamic> _$PricelistModelToJson(PricelistModel instance) =>
       'display_name': instance.displayName,
     };
 
-CurrencyInfo _$CurrencyInfoFromJson(Map<String, dynamic> json) =>
-    CurrencyInfo(id: json['id'], displayName: json['display_name']);
+CurrencyInfo _$CurrencyInfoFromJson(Map<String, dynamic> json) => CurrencyInfo(
+      id: json['id'],
+      displayName: json['display_name'],
+    );
 
 Map<String, dynamic> _$CurrencyInfoToJson(CurrencyInfo instance) =>
-    <String, dynamic>{'id': instance.id, 'display_name': instance.displayName};
+    <String, dynamic>{
+      'id': instance.id,
+      'display_name': instance.displayName,
+    };
 
 PricelistItem _$PricelistItemFromJson(Map<String, dynamic> json) =>
     PricelistItem(
