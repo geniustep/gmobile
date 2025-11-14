@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:gsloution_mobile/common/config/import.dart';
 import 'package:gsloution_mobile/common/config/prefs/pref_utils.dart';
 import 'package:gsloution_mobile/src/presentation/screens/products/products_sections/product_details.dart';
+import 'package:gsloution_mobile/src/presentation/screens/products/products_sections/product_reels_viewer.dart';
 import 'package:gsloution_mobile/src/presentation/screens/products/products_sections/update_product_screen.dart';
 import 'package:gsloution_mobile/src/presentation/widgets/toast/delete_toast.dart';
 
@@ -126,31 +127,33 @@ class _ProductListSectionState extends State<ProductListSection> {
 
   /// 🆕 تصميم البطاقة للـ GridView
   Widget _buildProductCard(ProductModel product, int id, int index) {
-    return InkWell(
-      onTap: () {
-        Get.to(
-          () => ProductDetails(
-            product: product,
-            // productList: widget.productList,
-            // currentIndex: index,
-          ),
-        );
-      },
-      onLongPress: () {
-        showDialogEdit(
-          context: context,
-          product: product,
-          id: id,
-          index: index,
-        );
-      },
-      child: Card(
-        elevation: 2,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Expanded(
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Expanded(
+            child: InkWell(
+              onTap: () {
+                // Open Instagram Reels-style viewer on image tap
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => ProductReelsViewer(
+                      products: widget.productList,
+                      initialIndex: index,
+                    ),
+                  ),
+                );
+              },
+              onLongPress: () {
+                showDialogEdit(
+                  context: context,
+                  product: product,
+                  id: id,
+                  index: index,
+                );
+              },
               child: ClipRRect(
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(12),
@@ -169,7 +172,15 @@ class _ProductListSectionState extends State<ProductListSection> {
                       ),
               ),
             ),
-            Padding(
+          ),
+          InkWell(
+            onTap: () {
+              // Go to product details
+              Get.to(
+                () => ProductDetails(product: product),
+              );
+            },
+            child: Padding(
               padding: const EdgeInsets.all(6.0),
               child: Column(
                 children: [
@@ -193,8 +204,8 @@ class _ProductListSectionState extends State<ProductListSection> {
                 ],
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -219,16 +230,15 @@ class _ProductListSectionState extends State<ProductListSection> {
           children: [
             // photo + code
             InkWell(
-              onTap: () async {
-                await showDialog(
-                  context: context,
-                  builder: (_) {
-                    final String imageToShow = isChampsValid(product.image_1920)
-                        ? product.image_1920
-                        : "assets/images/other/empty_product.png";
-
-                    return ImageTap(imageToShow);
-                  },
+              onTap: () {
+                // Open Instagram Reels-style viewer
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => ProductReelsViewer(
+                      products: widget.productList,
+                      initialIndex: index,
+                    ),
+                  ),
                 );
               },
               child: Column(

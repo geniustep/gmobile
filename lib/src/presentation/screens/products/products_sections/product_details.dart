@@ -4,6 +4,7 @@ import 'package:gsloution_mobile/common/config/app_colors.dart';
 import 'package:gsloution_mobile/common/config/prefs/pref_utils.dart';
 import 'package:gsloution_mobile/common/widgets/build_image.dart';
 import 'package:gsloution_mobile/src/presentation/widgets/draft_indicators/draft_app_bar_badge.dart';
+import 'package:gsloution_mobile/src/presentation/screens/products/products_sections/product_reels_viewer.dart';
 import 'package:intl/intl.dart';
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
@@ -155,18 +156,19 @@ class ProductDetails extends StatelessWidget {
       }
 
       return InkWell(
-        onTap: () async {
-          await showDialog(
-            context: context,
-            builder: (_) {
-              final String imageToShow = kReleaseMode
-                  ? (isChampsValid(product.image_1920)
-                        ? product.image_1920
-                        : "assets/images/other/empty_product.png")
-                  : "assets/images/other/empty_product.png";
+        onTap: () {
+          // Get all products and find current product index
+          final allProducts = PrefUtils.products;
+          final currentIndex = allProducts.indexWhere((p) => p.id == product.id);
 
-              return ImageTap(imageToShow);
-            },
+          // Open Instagram Reels-style viewer
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => ProductReelsViewer(
+                products: allProducts,
+                initialIndex: currentIndex >= 0 ? currentIndex : 0,
+              ),
+            ),
           );
         },
         child: Container(
