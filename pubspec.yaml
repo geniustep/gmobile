@@ -28,7 +28,7 @@ dependencies:
   flutter_form_builder: ^10.2.0
   google_fonts: ^6.2.1
   build_runner: ^2.4.13
-  json_serializable: ^6.9.0
+  json_serializable: ^6.8.0
   mobile_scanner: ^7.0.1
   image_picker: ^1.1.2
   grouped_list: ^6.0.0
