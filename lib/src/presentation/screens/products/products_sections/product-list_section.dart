@@ -176,9 +176,7 @@ class _ProductListSectionState extends State<ProductListSection> {
           InkWell(
             onTap: () {
               // Go to product details
-              Get.to(
-                () => ProductDetails(product: product),
-              );
+              Get.to(() => ProductDetails(product: product));
             },
             child: Padding(
               padding: const EdgeInsets.all(6.0),
