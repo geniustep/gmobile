@@ -32,16 +32,32 @@ extension MyString on String {
     double? width,
     BoxFit? fit,
     String? placeholder,
+    Duration? cacheDuration,
+    int? maxWidthDiskCache,
+    int? maxHeightDiskCache,
   }) => CachedNetworkImage(
     fit: fit ?? BoxFit.fill,
     height: height ?? 20.0,
     width: width ?? 20.0,
     imageUrl: this,
-    progressIndicatorBuilder: (context, url, downloadProgress) =>
-        CircularProgressIndicator(value: downloadProgress.progress),
+    maxWidthDiskCache: maxWidthDiskCache ?? 1000,
+    maxHeightDiskCache: maxHeightDiskCache ?? 1000,
+    memCacheWidth: width?.toInt(),
+    memCacheHeight: height?.toInt(),
+    progressIndicatorBuilder: (context, url, downloadProgress) => Center(
+      child: CircularProgressIndicator(
+        value: downloadProgress.progress,
+        strokeWidth: 2,
+      ),
+    ),
     errorWidget: (context, url, error) => placeholder != null
         ? Image.asset(placeholder, fit: BoxFit.fill)
-        : Icon(Icons.error),
+        : Container(
+            color: Colors.grey[200],
+            child: Icon(Icons.error, color: Colors.grey[400]),
+          ),
+    fadeInDuration: const Duration(milliseconds: 300),
+    fadeOutDuration: const Duration(milliseconds: 100),
   );
 
   String setKVal() {

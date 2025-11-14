@@ -4,6 +4,7 @@ import 'package:gsloution_mobile/common/api_factory/models/stock/stock_picking/s
 import 'package:gsloution_mobile/common/api_factory/models/stock/stock_move_line/stock_move_line_model.dart';
 import 'package:gsloution_mobile/common/config/import.dart';
 import 'package:gsloution_mobile/common/config/prefs/pref_keys.dart';
+import 'package:gsloution_mobile/common/utils/security_helper.dart';
 import 'package:gsloution_mobile/src/authentication/models/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -36,11 +37,20 @@ class PrefUtils {
 
   static Future<void> setToken(String token) async {
     await initPreferences();
+    // Encrypt token before saving
+    await SecurityHelper.saveEncryptedToken(PrefKeys.token, token);
+    // Also save unencrypted for backward compatibility (remove in future)
     await preferences!.setString(PrefKeys.token, token);
   }
 
   static Future<String> getToken() async {
     await initPreferences();
+    // Try to get encrypted token first
+    final encryptedToken = await SecurityHelper.getEncryptedToken(PrefKeys.token);
+    if (encryptedToken != null && encryptedToken.isNotEmpty) {
+      return encryptedToken;
+    }
+    // Fallback to unencrypted token
     return preferences!.getString(PrefKeys.token) ?? "";
   }
 

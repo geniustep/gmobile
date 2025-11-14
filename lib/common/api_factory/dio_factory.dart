@@ -6,6 +6,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:gsloution_mobile/common/config/config.dart';
 import 'package:gsloution_mobile/common/config/import.dart';
+import 'package:gsloution_mobile/common/api_factory/interceptors/retry_interceptor.dart';
+import 'package:gsloution_mobile/common/api_factory/interceptors/auth_interceptor.dart';
 
 typedef void OnError(String error, Map<String, dynamic> data);
 typedef void OnResponse<T>(T response);
@@ -88,6 +90,16 @@ class DioFactory {
         ),
       );
     }
+
+    // Add auth interceptor first (handles token refresh)
+    _dio!.interceptors.add(AuthInterceptor());
+    
+    // Add retry interceptor before other interceptors
+    _dio!.interceptors.add(RetryInterceptor(
+      dio: _dio!,
+      maxRetries: 3,
+      retryDelay: const Duration(seconds: 2),
+    ));
 
     _dio!.interceptors.add(
       InterceptorsWrapper(

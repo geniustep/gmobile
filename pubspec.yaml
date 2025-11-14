@@ -52,6 +52,7 @@ dependencies:
   floating_action_bubble: ^1.1.4
   dropdown_search: ^6.0.1
   rename_app: ^1.6.1
+  crypto: ^3.0.5
  
   
 dev_dependencies:
