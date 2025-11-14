@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:gsloution_mobile/common/config/prefs/pref_utils.dart';
 import 'package:gsloution_mobile/src/routes/app_routes.dart';
 import 'package:gsloution_mobile/src/utils/contstants.dart';
+import 'package:gsloution_mobile/common/utils/dashboard_calculator.dart';
 
 class TodayReportsSection extends StatelessWidget {
   const TodayReportsSection({super.key});
@@ -12,6 +13,11 @@ class TodayReportsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
+
+    // Calculate real-time statistics
+    final todaySales = DashboardCalculator.calculateTodaySales(PrefUtils.sales);
+    final todayPurchases = DashboardCalculator.calculateTodayPurchases(PrefUtils.accountMove);
+    final todayExpenses = DashboardCalculator.calculateTodayExpenses(PrefUtils.accountMove);
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
@@ -63,7 +69,7 @@ class TodayReportsSection extends StatelessWidget {
               children: [
                 buildReports(
                   "Sales",
-                  "20,000",
+                  DashboardCalculator.formatCurrency(todaySales),
                   Colors.lightBlueAccent.shade100.withOpacity(0.25),
                   "assets/icons/icon_svg/sale_service_icon.svg",
                   screenWidth,
@@ -71,7 +77,7 @@ class TodayReportsSection extends StatelessWidget {
                 ),
                 buildReports(
                   "Purchase",
-                  "20,000",
+                  DashboardCalculator.formatCurrency(todayPurchases),
                   Colors.purple.shade100.withOpacity(0.25),
                   "assets/icons/icon_svg/purchase_service_icon.svg",
                   screenWidth,
@@ -79,7 +85,7 @@ class TodayReportsSection extends StatelessWidget {
                 ),
                 buildReports(
                   "Expense",
-                  "10,000",
+                  DashboardCalculator.formatCurrency(todayExpenses),
                   Colors.teal.shade100.withOpacity(0.25),
                   "assets/icons/icon_svg/expenses_icon.svg",
                   screenWidth,
@@ -135,19 +141,14 @@ class TodayReportsSection extends StatelessWidget {
                 ),
               ),
             ),
-            Text.rich(
-              TextSpan(
-                style: GoogleFonts.nunito(
-                  textStyle: TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: MediaQuery.of(context).size.width * 0.045,
-                    color: const Color(0xFF333333),
-                  ),
+            Text(
+              amount, // Already formatted with currency symbol
+              style: GoogleFonts.nunito(
+                textStyle: TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: MediaQuery.of(context).size.width * 0.045,
+                  color: const Color(0xFF333333),
                 ),
-                children: [
-                  const TextSpan(text: "\$"),
-                  TextSpan(text: amount),
-                ],
               ),
             ),
           ],
