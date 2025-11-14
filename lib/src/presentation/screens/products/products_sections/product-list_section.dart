@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:gsloution_mobile/common/config/import.dart';
 import 'package:gsloution_mobile/common/config/prefs/pref_utils.dart';
@@ -26,6 +28,43 @@ class ProductListSection extends StatefulWidget {
 class _ProductListSectionState extends State<ProductListSection> {
   bool isChampsValid(dynamic champs) {
     return champs != null && champs != false && champs != "";
+  }
+
+  // دالة لتحويل الصورة من قاعدة البيانات إلى Uint8List
+  Uint8List? _getImageBytes(dynamic imageData) {
+    try {
+      if (imageData == null || imageData == false) {
+        return null;
+      }
+
+      // إذا كانت String (base64)
+      if (imageData is String) {
+        if (imageData.isEmpty) {
+          return null;
+        }
+
+        try {
+          return base64Decode(imageData);
+        } catch (e) {
+          if (kDebugMode) {
+            print('Error decoding base64 image: $e');
+          }
+          return null;
+        }
+      }
+
+      // إذا كانت Uint8List بالفعل
+      if (imageData is Uint8List) {
+        return imageData;
+      }
+
+      return null;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting image bytes: $e');
+      }
+      return null;
+    }
   }
 
   @override
@@ -116,15 +155,18 @@ class _ProductListSectionState extends State<ProductListSection> {
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(12),
                 ),
-                child: buildImage(
-                  image: kReleaseMode
-                      ? (isChampsValid(product.image_512)
-                            ? product.image_512
-                            : "assets/images/other/empty_product.png")
-                      : "assets/images/other/empty_product.png",
-                  width: double.infinity,
-                  height: double.infinity,
-                ),
+                child: isChampsValid(product.image_512)
+                    ? _buildProductImage(
+                        imageData: product.image_512,
+                        width: double.infinity,
+                        height: double.infinity,
+                      )
+                    : Image.asset(
+                        "assets/images/other/empty_product.png",
+                        width: double.infinity,
+                        height: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
               ),
             ),
             Padding(
@@ -181,10 +223,8 @@ class _ProductListSectionState extends State<ProductListSection> {
                 await showDialog(
                   context: context,
                   builder: (_) {
-                    final String imageToShow = kReleaseMode
-                        ? (isChampsValid(product.image_1920)
-                              ? product.image_1920
-                              : "assets/images/other/empty_product.png")
+                    final String imageToShow = isChampsValid(product.image_1920)
+                        ? product.image_1920
                         : "assets/images/other/empty_product.png";
 
                     return ImageTap(imageToShow);
@@ -195,13 +235,18 @@ class _ProductListSectionState extends State<ProductListSection> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: buildImage(
-                      image: kReleaseMode
-                          ? product.image_512
-                          : "assets/images/other/empty_product.png",
-                      width: MediaQuery.of(context).size.width * 0.2,
-                      height: MediaQuery.of(context).size.width * 0.2,
-                    ),
+                    child: isChampsValid(product.image_512)
+                        ? _buildProductImage(
+                            imageData: product.image_512,
+                            width: MediaQuery.of(context).size.width * 0.2,
+                            height: MediaQuery.of(context).size.width * 0.2,
+                          )
+                        : Image.asset(
+                            "assets/images/other/empty_product.png",
+                            width: MediaQuery.of(context).size.width * 0.2,
+                            height: MediaQuery.of(context).size.width * 0.2,
+                            fit: BoxFit.cover,
+                          ),
                   ),
                   Text(
                     "[ ${product.default_code ?? ""} ]",
@@ -421,5 +466,38 @@ class _ProductListSectionState extends State<ProductListSection> {
         );
       },
     );
+  }
+
+  // دالة لبناء صورة المنتج من البيانات
+  Widget _buildProductImage({
+    required dynamic imageData,
+    required double width,
+    required double height,
+  }) {
+    final imageBytes = _getImageBytes(imageData);
+
+    if (imageBytes != null) {
+      return Image.memory(
+        imageBytes,
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Image.asset(
+            "assets/images/other/empty_product.png",
+            width: width,
+            height: height,
+            fit: BoxFit.cover,
+          );
+        },
+      );
+    } else {
+      return Image.asset(
+        "assets/images/other/empty_product.png",
+        width: width,
+        height: height,
+        fit: BoxFit.cover,
+      );
+    }
   }
 }

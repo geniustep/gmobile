@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:gsloution_mobile/common/api_factory/models/product/product_list/pricelist_model.dart';
 import 'package:gsloution_mobile/common/api_factory/models/stock/stock_picking/stock_picking_model.dart';
 import 'package:gsloution_mobile/common/api_factory/models/stock/stock_move_line/stock_move_line_model.dart';
+import 'package:gsloution_mobile/common/api_factory/models/stock/stock_warehouse/stock_warehouse_model.dart';
 import 'package:gsloution_mobile/common/config/import.dart';
 import 'package:gsloution_mobile/common/config/prefs/pref_keys.dart';
 import 'package:gsloution_mobile/common/utils/security_helper.dart';
@@ -24,6 +25,7 @@ class PrefUtils {
   static var listesPrix = <PricelistModel>[].obs;
   static var stockPicking = <StockPickingModel>[].obs;
   static var stockMoveLines = <StockMoveLineModel>[].obs;
+  static var warehouses = <StockWarehouseModel>[].obs;
   static List<dynamic> conditionsPaiement = [];
 
   static Future<void> initPreferences() async {
@@ -412,5 +414,29 @@ class PrefUtils {
     }
     List<dynamic> decoded = jsonDecode(accountMoveString);
     return RxList(decoded.map((e) => AccountMoveModel.fromJson(e)).toList());
+  }
+
+  ////////// Warehouses ////
+  static Future<void> setWarehouses(RxList<StockWarehouseModel> warehouseList) async {
+    await initPreferences();
+    warehouses = warehouseList;
+    preferences!.setString(PrefKeys.warehouses, jsonEncode(warehouseList.toList()));
+  }
+
+  static Future<RxList<StockWarehouseModel>> getWarehouses() async {
+    await initPreferences();
+    var warehousesString = preferences!.getString(PrefKeys.warehouses);
+    if (warehousesString == null || warehousesString.isEmpty) {
+      return <StockWarehouseModel>[].obs;
+    }
+    try {
+      List<dynamic> decoded = jsonDecode(warehousesString);
+      return RxList(decoded.map((e) => StockWarehouseModel.fromJson(e)).toList());
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error loading warehouses from SharedPreferences: $e');
+      }
+      return <StockWarehouseModel>[].obs;
+    }
   }
 }
