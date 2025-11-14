@@ -14,6 +14,12 @@ import 'package:gsloution_mobile/common/api_factory/modules/settings_odoo_module
 
 import 'package:gsloution_mobile/common/config/import.dart';
 import 'package:gsloution_mobile/common/config/prefs/pref_utils.dart';
+import 'package:gsloution_mobile/common/config/hive/hive_products.dart';
+import 'package:gsloution_mobile/common/config/hive/hive_partners.dart';
+import 'package:gsloution_mobile/common/config/hive/hive_sales.dart';
+import 'package:gsloution_mobile/common/config/hive/hive_account_moves.dart';
+import 'package:gsloution_mobile/common/config/hive/hive_stock_picking.dart';
+import 'package:gsloution_mobile/common/config/hive/hive_warehouses.dart';
 import 'package:gsloution_mobile/src/routes/app_routes.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -356,7 +362,7 @@ class _SplashScreenState extends State<SplashScreen>
       _apiController.getAccountJournal(
         showGlobalLoading: false,
         onResponse: (resJournals) {
-          print('📋 Journals received: ${resJournals?.length ?? 0}');
+          print('📋 Journals received: ${resJournals.length}');
           completer.complete(resJournals);
         },
       );
@@ -365,7 +371,7 @@ class _SplashScreenState extends State<SplashScreen>
         const Duration(seconds: 30),
         onTimeout: () {
           print('⏰ Timeout loading journals');
-          return null;
+          return <AccountJournalModel>[];
         },
       );
 
@@ -494,8 +500,8 @@ class _SplashScreenState extends State<SplashScreen>
 
       _updateModelProgress('المنتجات', 80, 'جاري حفظ المنتجات...');
       print('✅ Products loaded successfully: ${resProducts.length} products');
-      products.addAll(resProducts);
-      await PrefUtils.setProducts(products);
+      // حفظ مباشرة في Hive بدون استخدام متغير محلي
+      await PrefUtils.setProducts(RxList(resProducts));
 
       _updateModelProgress('المنتجات', 100, 'تم تحميل المنتجات بنجاح');
       _updateProgress('products');
@@ -562,8 +568,8 @@ class _SplashScreenState extends State<SplashScreen>
       }
 
       _updateModelProgress('المبيعات', 80, 'جاري حفظ المبيعات...');
-      sales.addAll(resSales);
-      await PrefUtils.setSales(sales);
+      // حفظ مباشرة في Hive بدون استخدام متغير محلي
+      await PrefUtils.setSales(RxList(resSales));
 
       _updateModelProgress('المبيعات', 100, 'تم تحميل المبيعات بنجاح');
       print('✅ Sales loaded successfully: ${resSales.length} sales');
@@ -623,8 +629,8 @@ class _SplashScreenState extends State<SplashScreen>
 
       _updateModelProgress('العملاء', 80, 'جاري حفظ العملاء...');
       print('✅ Partners loaded successfully: ${resPartners.length} partners');
-      partners.addAll(resPartners);
-      await PrefUtils.setPartners(partners);
+      // حفظ مباشرة في Hive بدون استخدام متغير محلي
+      await PrefUtils.setPartners(RxList(resPartners));
 
       _updateModelProgress('العملاء', 100, 'تم تحميل العملاء بنجاح');
       _updateProgress('partners');
@@ -674,8 +680,8 @@ class _SplashScreenState extends State<SplashScreen>
         80,
         'جاري حفظ الحركات المحاسبية...',
       );
-      accountMove.addAll(resAccountMove);
-      await PrefUtils.setAccountMove(accountMove);
+      // حفظ مباشرة في Hive بدون استخدام متغير محلي
+      await PrefUtils.setAccountMove(RxList(resAccountMove));
 
       _updateModelProgress(
         'الحركات المحاسبية',
@@ -727,8 +733,8 @@ class _SplashScreenState extends State<SplashScreen>
       }
 
       _updateModelProgress('إدارة المخزون', 80, 'جاري حفظ إدارة المخزون...');
-      stockPicking.addAll(resStockPicking);
-      await PrefUtils.setStockPicking(stockPicking);
+      // حفظ مباشرة في Hive بدون استخدام متغير محلي
+      await PrefUtils.setStockPicking(RxList(resStockPicking));
 
       _updateModelProgress(
         'إدارة المخزون',
@@ -768,17 +774,17 @@ class _SplashScreenState extends State<SplashScreen>
         });
       }
 
-      // ✅ طباعة إحصائيات التحميل
+      // ✅ طباعة إحصائيات التحميل من PrefUtils
       print('\n📈 Loading Statistics:');
-      print('   Products: ${products.length}');
+      print('   Products: ${PrefUtils.products.length}');
       print('   Categories: ${categoryProduct.length}');
-      print('   Sales: ${sales.length}');
+      print('   Sales: ${PrefUtils.sales.length}');
       print('   Order Lines: ${orderLine.length}');
-      print('   Partners: ${partners.length}');
-      print('   Account Moves: ${accountMove.length}');
+      print('   Partners: ${PrefUtils.partners.length}');
+      print('   Account Moves: ${PrefUtils.accountMove.length}');
       print('   Account Move Lines: ${accountMoveLine.length}');
       print('   Price Lists: ${listesPrix.length}');
-      print('   Stock Picking: ${stockPicking.length}');
+      print('   Stock Picking: ${PrefUtils.stockPicking.length}');
       print('   Payment Terms: ${conditionsPaiement.length}');
       print('═══════════════════════════════════════════\n');
 
@@ -1399,7 +1405,15 @@ class _SplashScreenState extends State<SplashScreen>
     currentModel = '';
     modelProgress = 0;
 
-    // إعادة تعيين البيانات
+    // إعادة تعيين البيانات - مسح من Hive و SharedPreferences
+    HiveProducts.clearProducts();
+    HivePartners.clearPartners();
+    HiveSales.clearSales();
+    HiveAccountMoves.clearAccountMoves();
+    HiveStockPicking.clearStockPicking();
+    HiveWarehouses.clearWarehouses();
+    
+    // مسح المتغيرات المحلية
     products.clear();
     categoryProduct.clear();
     sales.clear();

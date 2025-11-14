@@ -23,6 +23,7 @@ class HiveService {
   static const String _priceListsBox = 'priceLists';
   static const String _stockPickingBox = 'stockPicking';
   static const String _accountMoveBox = 'accountMove';
+  static const String _warehousesBox = 'warehouses';
   static const String _metadataBox = 'metadata'; // للتخزين التوقيت وغيره
 
   // ════════════════════════════════════════════════════════════
@@ -35,6 +36,7 @@ class HiveService {
   late Box<dynamic> priceListsBox;
   late Box<dynamic> stockPickingBox;
   late Box<dynamic> accountMoveBox;
+  late Box<dynamic> warehousesBox;
   late Box<dynamic> metadataBox;
 
   bool _isInitialized = false;
@@ -77,6 +79,7 @@ class HiveService {
       priceListsBox = await Hive.openBox(_priceListsBox);
       stockPickingBox = await Hive.openBox(_stockPickingBox);
       accountMoveBox = await Hive.openBox(_accountMoveBox);
+      warehousesBox = await Hive.openBox(_warehousesBox);
       metadataBox = await Hive.openBox(_metadataBox);
 
       _isInitialized = true;
@@ -290,6 +293,9 @@ class HiveService {
       case 'accountMove':
         box = accountMoveBox;
         break;
+      case 'warehouses':
+        box = warehousesBox;
+        break;
       default:
         throw Exception('Unknown box: $boxName');
     }
@@ -315,12 +321,150 @@ class HiveService {
       case 'accountMove':
         box = accountMoveBox;
         break;
+      case 'warehouses':
+        box = warehousesBox;
+        break;
       default:
         throw Exception('Unknown box: $boxName');
     }
 
     return box.get(key);
   }
+
+  // ════════════════════════════════════════════════════════════
+  // Account Moves Methods
+  // ════════════════════════════════════════════════════════════
+
+  Future<void> saveAccountMoves(List<dynamic> accountMoves) async {
+    await _ensureInitialized();
+    
+    final batch = <String, dynamic>{};
+    for (var accountMove in accountMoves) {
+      final id = accountMove['id'] ?? accountMove.id;
+      if (id != null) {
+        batch[id.toString()] = accountMove;
+      }
+    }
+    
+    await accountMoveBox.putAll(batch);
+    await _updateLastSync('accountMove');
+    
+    if (kDebugMode) {
+      print('✅ Saved ${accountMoves.length} account moves to Hive');
+    }
+  }
+
+  Future<List<dynamic>> getAccountMoves({int? limit, int? offset}) async {
+    await _ensureInitialized();
+    
+    var accountMoves = accountMoveBox.values.toList();
+    
+    if (offset != null && offset > 0) {
+      accountMoves = accountMoves.skip(offset).toList();
+    }
+    if (limit != null && limit > 0) {
+      accountMoves = accountMoves.take(limit).toList();
+    }
+    
+    return accountMoves;
+  }
+
+  Future<void> clearAccountMoves() async {
+    await _ensureInitialized();
+    await accountMoveBox.clear();
+  }
+
+  int get accountMovesCount => accountMoveBox.length;
+
+  // ════════════════════════════════════════════════════════════
+  // Stock Picking Methods
+  // ════════════════════════════════════════════════════════════
+
+  Future<void> saveStockPicking(List<dynamic> stockPickingList) async {
+    await _ensureInitialized();
+    
+    final batch = <String, dynamic>{};
+    for (var picking in stockPickingList) {
+      final id = picking['id'] ?? picking.id;
+      if (id != null) {
+        batch[id.toString()] = picking;
+      }
+    }
+    
+    await stockPickingBox.putAll(batch);
+    await _updateLastSync('stockPicking');
+    
+    if (kDebugMode) {
+      print('✅ Saved ${stockPickingList.length} stock pickings to Hive');
+    }
+  }
+
+  Future<List<dynamic>> getStockPicking({int? limit, int? offset}) async {
+    await _ensureInitialized();
+    
+    var stockPickingList = stockPickingBox.values.toList();
+    
+    if (offset != null && offset > 0) {
+      stockPickingList = stockPickingList.skip(offset).toList();
+    }
+    if (limit != null && limit > 0) {
+      stockPickingList = stockPickingList.take(limit).toList();
+    }
+    
+    return stockPickingList;
+  }
+
+  Future<void> clearStockPicking() async {
+    await _ensureInitialized();
+    await stockPickingBox.clear();
+  }
+
+  int get stockPickingCount => stockPickingBox.length;
+
+  // ════════════════════════════════════════════════════════════
+  // Warehouses Methods
+  // ════════════════════════════════════════════════════════════
+
+  Future<void> saveWarehouses(List<dynamic> warehouses) async {
+    await _ensureInitialized();
+    
+    final batch = <String, dynamic>{};
+    for (var warehouse in warehouses) {
+      final id = warehouse['id'] ?? warehouse.id;
+      if (id != null) {
+        batch[id.toString()] = warehouse;
+      }
+    }
+    
+    await warehousesBox.putAll(batch);
+    await _updateLastSync('warehouses');
+    
+    if (kDebugMode) {
+      print('✅ Saved ${warehouses.length} warehouses to Hive');
+    }
+  }
+
+  Future<List<dynamic>> getWarehouses({int? limit, int? offset}) async {
+    await _ensureInitialized();
+    
+    var warehousesList = warehousesBox.values.toList();
+    
+    if (offset != null && offset > 0) {
+      warehousesList = warehousesList.skip(offset).toList();
+    }
+    if (limit != null && limit > 0) {
+      warehousesList = warehousesList.take(limit).toList();
+    }
+    
+    return warehousesList;
+  }
+
+  Future<void> clearWarehouses() async {
+    await _ensureInitialized();
+    await warehousesBox.clear();
+  }
+
+  int get warehousesCount => warehousesBox.length;
 
   // ════════════════════════════════════════════════════════════
   // Metadata & Sync Tracking
@@ -365,6 +509,7 @@ class HiveService {
     await priceListsBox.clear();
     await stockPickingBox.clear();
     await accountMoveBox.clear();
+    await warehousesBox.clear();
     await metadataBox.clear();
 
     if (kDebugMode) {
@@ -394,6 +539,7 @@ class HiveService {
       'priceLists': priceListsBox.length,
       'stockPicking': stockPickingBox.length,
       'accountMove': accountMoveBox.length,
+      'warehouses': warehousesBox.length,
     };
   }
 }

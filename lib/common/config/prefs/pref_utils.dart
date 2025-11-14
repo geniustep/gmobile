@@ -5,6 +5,12 @@ import 'package:gsloution_mobile/common/api_factory/models/stock/stock_move_line
 import 'package:gsloution_mobile/common/api_factory/models/stock/stock_warehouse/stock_warehouse_model.dart';
 import 'package:gsloution_mobile/common/config/import.dart';
 import 'package:gsloution_mobile/common/config/prefs/pref_keys.dart';
+import 'package:gsloution_mobile/common/config/hive/hive_products.dart';
+import 'package:gsloution_mobile/common/config/hive/hive_partners.dart';
+import 'package:gsloution_mobile/common/config/hive/hive_sales.dart';
+import 'package:gsloution_mobile/common/config/hive/hive_account_moves.dart';
+import 'package:gsloution_mobile/common/config/hive/hive_stock_picking.dart';
+import 'package:gsloution_mobile/common/config/hive/hive_warehouses.dart';
 import 'package:gsloution_mobile/common/utils/security_helper.dart';
 import 'package:gsloution_mobile/src/authentication/models/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,17 +21,18 @@ class PrefUtils {
   static SharedPreferences? preferences;
   static double latitude = 0;
   static double longitude = 0;
-  static var products = <ProductModel>[].obs;
+  // استخدام المتغيرات من الملفات الجديدة
+  static RxList<ProductModel> get products => HiveProducts.products;
   static var categoryProduct = <ProductCategoryModel>[].obs;
-  static var partners = <PartnerModel>[].obs;
+  static RxList<PartnerModel> get partners => HivePartners.partners;
   static var user = UserModel().obs;
-  static var sales = <OrderModel>[].obs;
+  static RxList<OrderModel> get sales => HiveSales.sales;
   static var orderLine = <OrderLineModel>[].obs;
-  static var accountMove = <AccountMoveModel>[].obs;
+  static RxList<AccountMoveModel> get accountMove => HiveAccountMoves.accountMoves;
   static var listesPrix = <PricelistModel>[].obs;
-  static var stockPicking = <StockPickingModel>[].obs;
+  static RxList<StockPickingModel> get stockPicking => HiveStockPicking.stockPicking;
   static var stockMoveLines = <StockMoveLineModel>[].obs;
-  static var warehouses = <StockWarehouseModel>[].obs;
+  static RxList<StockWarehouseModel> get warehouses => HiveWarehouses.warehouses;
   static List<dynamic> conditionsPaiement = [];
 
   static Future<void> initPreferences() async {
@@ -68,9 +75,9 @@ class PrefUtils {
 
   // Location
 
-  static setLatitude(double lat) async {
+  static Future<void> setLatitude(double lat) async {
     latitude = lat;
-    return await preferences!.setDouble(PrefKeys.lat, latitude);
+    await preferences!.setDouble(PrefKeys.lat, latitude);
   }
 
   static double getLatitude() {
@@ -80,9 +87,9 @@ class PrefUtils {
     return 0;
   }
 
-  static setLongitude(double long) async {
+  static Future<void> setLongitude(double long) async {
     longitude = long;
-    return await preferences!.setDouble(PrefKeys.long, longitude);
+    await preferences!.setDouble(PrefKeys.long, longitude);
   }
 
   static double getLongitude() {
@@ -107,51 +114,26 @@ class PrefUtils {
     return user.value;
   }
 
-  // Partners
+  // Partners - باستخدام HivePartners
   static Future<void> setPartners(RxList<PartnerModel> partner) async {
-    await initPreferences();
-    partners = partner;
-    preferences!.setString(PrefKeys.partners, jsonEncode(partner.toList()));
+    await HivePartners.setPartners(partner);
   }
 
   static Future<RxList<PartnerModel>> getPartners() async {
-    await initPreferences();
-    var partnersString = preferences!.getString(PrefKeys.partners);
-    if (partnersString == null || partnersString.isEmpty) {
-      return <PartnerModel>[].obs;
-    }
-    List<dynamic> decoded = jsonDecode(partnersString);
-    return RxList(decoded.map((e) => PartnerModel.fromJson(e)).toList());
+    return await HivePartners.getPartners();
   }
 
   static Future<void> updatePartner(PartnerModel updatedPartner) async {
-    RxList<PartnerModel> currentPartners = await getPartners();
-    int index = currentPartners.indexWhere(
-      (partner) => partner.id == updatedPartner.id,
-    );
-    if (index != -1) {
-      currentPartners[index] = updatedPartner;
-    } else {
-      currentPartners.add(updatedPartner);
-    }
-    await setPartners(currentPartners);
+    await HivePartners.updatePartner(updatedPartner);
   }
 
-  // Products
+  // Products - باستخدام HiveProducts
   static Future<void> setProducts(RxList<ProductModel> product) async {
-    await initPreferences();
-    products = product;
-    preferences!.setString(PrefKeys.products, jsonEncode(product.toList()));
+    await HiveProducts.setProducts(product);
   }
 
   static Future<RxList<ProductModel>> getProducts() async {
-    await initPreferences();
-    var productsString = preferences!.getString(PrefKeys.products);
-    if (productsString == null || productsString.isEmpty) {
-      return <ProductModel>[].obs;
-    }
-    List<dynamic> decoded = jsonDecode(productsString);
-    return RxList(decoded.map((e) => ProductModel.fromJson(e)).toList());
+    return await HiveProducts.getProducts();
   }
 
   // Category Product
@@ -178,36 +160,17 @@ class PrefUtils {
     );
   }
 
-  // sales
+  // Sales - باستخدام HiveSales
   static Future<void> setSales(RxList<OrderModel> saleS) async {
-    await initPreferences();
-    sales = saleS;
-    preferences!.setString(PrefKeys.sales, jsonEncode(saleS.toList()));
+    await HiveSales.setSales(saleS);
   }
 
   static Future<RxList<OrderModel>> getSales() async {
-    await initPreferences();
-    var salesString = preferences!.getString(PrefKeys.sales);
-    if (salesString == null || salesString.isEmpty) {
-      return <OrderModel>[].obs;
-    }
-    List<dynamic> decoded = jsonDecode(salesString);
-    return RxList(decoded.map((e) => OrderModel.fromJson(e)).toList());
+    return await HiveSales.getSales();
   }
 
   static Future<void> saveSales(RxList<OrderModel> saleS) async {
-    await initPreferences();
-    sales = saleS; // ← تحديث المتغير الثابت في PrefUtils
-
-    // ✅ تحسين الأداء: ضغط البيانات قبل الحفظ
-    try {
-      final jsonString = jsonEncode(saleS.toList());
-      await preferences!.setString(PrefKeys.sales, jsonString);
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error saving sales: $e');
-      }
-    }
+    await HiveSales.saveSales(saleS);
   }
 
   // salesLine
@@ -341,30 +304,17 @@ class PrefUtils {
   }
 
   ////////// Stock ////
-  // StockPicking
+  // StockPicking - باستخدام HiveStockPicking
   static Future<void> setStockPicking(RxList<StockPickingModel> stock) async {
-    await initPreferences();
-    stockPicking = stock;
-    preferences!.setString(PrefKeys.stockPicking, jsonEncode(stock.toList()));
+    await HiveStockPicking.setStockPicking(stock);
   }
 
   static Future<RxList<StockPickingModel>> getStockPicking() async {
-    await initPreferences();
-    var stock = preferences!.getString(PrefKeys.stockPicking);
-    if (stock == null || stock.isEmpty) {
-      return <StockPickingModel>[].obs;
-    }
-    List<dynamic> decoded = jsonDecode(stock);
-    return RxList(decoded.map((e) => StockPickingModel.fromJson(e)).toList());
+    return await HiveStockPicking.getStockPicking();
   }
 
   static Future<void> saveStockPicking(RxList<StockPickingModel> stock) async {
-    await initPreferences();
-    stockPicking.assignAll(stock); // ← تحديث المتغير الثابت في PrefUtils
-    await preferences!.setString(
-      PrefKeys.stockPicking,
-      jsonEncode(stock.toList()),
-    );
+    await HiveStockPicking.saveStockPicking(stock);
   }
 
   // StockMoveLines
@@ -398,45 +348,21 @@ class PrefUtils {
   }
 
   ////// ***** Invoice ****** //////
-  /// Account Move
-
+  /// Account Move - باستخدام HiveAccountMoves
   static Future<void> setAccountMove(RxList<AccountMoveModel> account) async {
-    await initPreferences();
-    accountMove = account;
-    preferences!.setString(PrefKeys.accountMove, jsonEncode(account.toList()));
+    await HiveAccountMoves.setAccountMoves(account);
   }
 
   static Future<RxList<AccountMoveModel>> getAccountMove() async {
-    await initPreferences();
-    var accountMoveString = preferences!.getString(PrefKeys.accountMove);
-    if (accountMoveString == null || accountMoveString.isEmpty) {
-      return <AccountMoveModel>[].obs;
-    }
-    List<dynamic> decoded = jsonDecode(accountMoveString);
-    return RxList(decoded.map((e) => AccountMoveModel.fromJson(e)).toList());
+    return await HiveAccountMoves.getAccountMoves();
   }
 
-  ////////// Warehouses ////
+  ////////// Warehouses - باستخدام HiveWarehouses ////
   static Future<void> setWarehouses(RxList<StockWarehouseModel> warehouseList) async {
-    await initPreferences();
-    warehouses = warehouseList;
-    preferences!.setString(PrefKeys.warehouses, jsonEncode(warehouseList.toList()));
+    await HiveWarehouses.setWarehouses(warehouseList);
   }
 
   static Future<RxList<StockWarehouseModel>> getWarehouses() async {
-    await initPreferences();
-    var warehousesString = preferences!.getString(PrefKeys.warehouses);
-    if (warehousesString == null || warehousesString.isEmpty) {
-      return <StockWarehouseModel>[].obs;
-    }
-    try {
-      List<dynamic> decoded = jsonDecode(warehousesString);
-      return RxList(decoded.map((e) => StockWarehouseModel.fromJson(e)).toList());
-    } catch (e) {
-      if (kDebugMode) {
-        print('❌ Error loading warehouses from SharedPreferences: $e');
-      }
-      return <StockWarehouseModel>[].obs;
-    }
+    return await HiveWarehouses.getWarehouses();
   }
 }
