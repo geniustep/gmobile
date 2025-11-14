@@ -5,6 +5,8 @@ import 'package:gsloution_mobile/common/api_factory/dio_factory.dart';
 import 'package:gsloution_mobile/common/app.dart';
 import 'package:gsloution_mobile/common/config/dependencies.dart';
 import 'package:gsloution_mobile/common/config/prefs/pref_utils.dart';
+import 'package:gsloution_mobile/common/storage/storage_service.dart';
+import 'package:gsloution_mobile/common/storage/migration_service.dart';
 import 'package:gsloution_mobile/location.dart';
 
 void main() async {
@@ -35,6 +37,15 @@ void main() async {
       // ✅ نقل ensureInitialized داخل الـ Zone
       WidgetsFlutterBinding.ensureInitialized();
 
+      // 🚀 تهيئة الـ Storage الهجين (SharedPreferences + Hive)
+      if (kDebugMode) {
+        print('\n🚀 Initializing Hybrid Storage System...');
+      }
+      await StorageService.instance.init();
+
+      // 📦 تنفيذ Migration من SharedPreferences إلى Hive
+      await MigrationService.instance.migrate();
+
       try {
         await MyLocation.getLatAndLong();
       } catch (e) {
@@ -45,8 +56,9 @@ void main() async {
 
       Dependencies.injectDependencies();
 
-      DioFactory.initialiseHeaders(await PrefUtils.getToken());
-      bool isLoggedIn = await PrefUtils.getIsLoggedIn();
+      // ✅ استخدام StorageService بدلاً من PrefUtils (للتوافق مع الكود القديم)
+      DioFactory.initialiseHeaders(await StorageService.instance.getToken());
+      bool isLoggedIn = await StorageService.instance.getIsLoggedIn();
 
       runApp(App(isLoggedIn));
     },

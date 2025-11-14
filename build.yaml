@@ -1,0 +1,17 @@
+# Build configuration for code generators
+targets:
+  $default:
+    builders:
+      # JSON Serializable
+      json_serializable:
+        enabled: true
+        options:
+          explicit_to_json: true
+          field_rename: none
+
+      # Hive Generator
+      hive_generator:hive_generator:
+        enabled: true
+        options:
+          # تأكد من توليد الـ adapters
+          generate_adapters: true
