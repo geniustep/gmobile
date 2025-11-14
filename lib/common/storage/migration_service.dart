@@ -7,8 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:gsloution_mobile/common/storage/storage_service.dart';
 import 'package:gsloution_mobile/common/storage/hive/entities/product_entity.dart';
-import 'package:gsloution_mobile/common/storage/hive/entities/partner_entity.dart';
-import 'package:gsloution_mobile/common/storage/hive/entities/sale_order_entity.dart';
 import 'package:gsloution_mobile/common/api_factory/models/product/product_model.dart';
 import 'package:gsloution_mobile/common/api_factory/models/partner/partner_model.dart';
 import 'package:gsloution_mobile/common/api_factory/models/order/sale_order_model.dart';

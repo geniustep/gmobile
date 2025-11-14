@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:gsloution_mobile/common/api_factory/dio_factory.dart';
 import 'package:gsloution_mobile/common/app.dart';
 import 'package:gsloution_mobile/common/config/dependencies.dart';
-import 'package:gsloution_mobile/common/config/prefs/pref_utils.dart';
 import 'package:gsloution_mobile/common/storage/storage_service.dart';
 import 'package:gsloution_mobile/common/storage/migration_service.dart';
 import 'package:gsloution_mobile/location.dart';

@@ -80,31 +80,31 @@ class PartnerEntity extends HiveObject {
     return PartnerEntity(
       id: model.id is int ? model.id : int.tryParse(model.id.toString()) ?? 0,
       name: model.name?.toString() ?? '',
-      displayName: model.display_name?.toString(),
+      displayName: model.displayName?.toString(),
       email: model.email?.toString(),
       phone: model.phone?.toString(),
       mobile: model.mobile?.toString(),
       street: model.street?.toString(),
       city: model.city?.toString(),
-      country: model.country_id is List
-          ? (model.country_id as List).length > 1
-              ? (model.country_id as List)[1].toString()
-              : null
+      country: model.countryId is List
+          ? (model.countryId as List).length > 1
+                ? (model.countryId as List)[1].toString()
+                : null
           : null,
       vat: model.vat?.toString(),
-      isCompany: model.is_company is bool ? model.is_company : false,
+      isCompany: model.isCompany is bool ? model.isCompany : false,
       image128: model.image_128?.toString(),
-      creditLimit: _toDouble(model.credit_limit),
-      propertyPaymentTermId: model.property_payment_term_id is List
-          ? (model.property_payment_term_id as List).isNotEmpty
-              ? _toInt((model.property_payment_term_id as List)[0])
-              : null
-          : _toInt(model.property_payment_term_id),
-      propertyProductPricelistId: model.property_product_pricelist is List
-          ? (model.property_product_pricelist as List).isNotEmpty
-              ? _toInt((model.property_product_pricelist as List)[0])
-              : null
-          : _toInt(model.property_product_pricelist),
+      creditLimit: _toDouble(model.credit),
+      propertyPaymentTermId: model.propertyPaymentTermId is List
+          ? (model.propertyPaymentTermId as List).isNotEmpty
+                ? _toInt((model.propertyPaymentTermId as List)[0])
+                : null
+          : _toInt(model.propertyPaymentTermId),
+      propertyProductPricelistId: model.propertyProductPricelist is List
+          ? (model.propertyProductPricelist as List).isNotEmpty
+                ? _toInt((model.propertyProductPricelist as List)[0])
+                : null
+          : _toInt(model.propertyProductPricelist),
       lastSync: DateTime.now(),
     );
   }
@@ -113,18 +113,18 @@ class PartnerEntity extends HiveObject {
     return PartnerModel(
       id: id,
       name: name,
-      display_name: displayName,
+      displayName: displayName,
       email: email,
       phone: phone,
       mobile: mobile,
       street: street,
       city: city,
       vat: vat,
-      is_company: isCompany,
+      isCompany: isCompany,
       image_128: image128,
-      credit_limit: creditLimit,
-      property_payment_term_id: propertyPaymentTermId,
-      property_product_pricelist: propertyProductPricelistId,
+      credit: creditLimit,
+      propertyPaymentTermId: propertyPaymentTermId,
+      propertyProductPricelist: propertyProductPricelistId,
     );
   }
 

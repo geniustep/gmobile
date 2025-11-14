@@ -72,34 +72,34 @@ class SaleOrderEntity extends HiveObject {
     return SaleOrderEntity(
       id: model.id is int ? model.id : int.tryParse(model.id.toString()) ?? 0,
       name: model.name?.toString() ?? '',
-      partnerId: model.partner_id is List
-          ? (model.partner_id as List).isNotEmpty
-              ? _toInt((model.partner_id as List)[0])
+      partnerId: model.partnerId is List
+          ? (model.partnerId as List).isNotEmpty
+              ? _toInt((model.partnerId as List)[0])
               : null
-          : _toInt(model.partner_id),
-      partnerName: model.partner_id is List
-          ? (model.partner_id as List).length > 1
-              ? (model.partner_id as List)[1].toString()
+          : _toInt(model.partnerId),
+      partnerName: model.partnerId is List
+          ? (model.partnerId as List).length > 1
+              ? (model.partnerId as List)[1].toString()
               : null
           : null,
-      dateOrder: model.date_order?.toString(),
-      amountTotal: _toDouble(model.amount_total),
-      amountUntaxed: _toDouble(model.amount_untaxed),
-      amountTax: _toDouble(model.amount_tax),
+      dateOrder: model.dateOrder?.toString(),
+      amountTotal: _toDouble(model.amountTotal),
+      amountUntaxed: _toDouble(model.amountUntaxed),
+      amountTax: _toDouble(model.amountTax),
       state: model.state?.toString(),
-      pricelistId: model.pricelist_id is List
-          ? (model.pricelist_id as List).isNotEmpty
-              ? _toInt((model.pricelist_id as List)[0])
+      pricelistId: model.pricelistId is List
+          ? (model.pricelistId as List).isNotEmpty
+              ? _toInt((model.pricelistId as List)[0])
               : null
-          : _toInt(model.pricelist_id),
-      paymentTermId: model.payment_term_id is List
-          ? (model.payment_term_id as List).isNotEmpty
-              ? _toInt((model.payment_term_id as List)[0])
+          : _toInt(model.pricelistId),
+      paymentTermId: model.paymentTermId is List
+          ? (model.paymentTermId as List).isNotEmpty
+              ? _toInt((model.paymentTermId as List)[0])
               : null
-          : _toInt(model.payment_term_id),
+          : _toInt(model.paymentTermId),
       note: model.note?.toString(),
-      orderLineIds: model.order_line is List
-          ? (model.order_line as List)
+      orderLineIds: model.orderLine is List
+          ? (model.orderLine as List)
               .map((e) => _toInt(e))
               .whereType<int>()
               .toList()
@@ -112,16 +112,16 @@ class SaleOrderEntity extends HiveObject {
     return OrderModel(
       id: id,
       name: name,
-      partner_id: partnerId != null ? [partnerId, partnerName] : null,
-      date_order: dateOrder,
-      amount_total: amountTotal,
-      amount_untaxed: amountUntaxed,
-      amount_tax: amountTax,
+      partnerId: partnerId != null ? [partnerId, partnerName] : null,
+      dateOrder: dateOrder,
+      amountTotal: amountTotal,
+      amountUntaxed: amountUntaxed,
+      amountTax: amountTax,
       state: state,
-      pricelist_id: pricelistId,
-      payment_term_id: paymentTermId,
+      pricelistId: pricelistId,
+      paymentTermId: paymentTermId,
       note: note,
-      order_line: orderLineIds,
+      orderLine: orderLineIds,
     );
   }
 
