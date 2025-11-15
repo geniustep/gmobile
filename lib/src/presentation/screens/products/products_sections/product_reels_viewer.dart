@@ -80,10 +80,7 @@ class _ProductReelsViewerState extends State<ProductReelsViewer> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.black.withOpacity(0.7),
-                    Colors.transparent,
-                  ],
+                  colors: [Colors.black.withOpacity(0.7), Colors.transparent],
                 ),
               ),
             ),
@@ -99,7 +96,11 @@ class _ProductReelsViewerState extends State<ProductReelsViewer> {
                   // Close button
                   IconButton(
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close, color: Colors.white, size: 28),
+                    icon: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 28,
+                    ),
                     style: IconButton.styleFrom(
                       backgroundColor: Colors.black.withOpacity(0.5),
                     ),
@@ -128,7 +129,11 @@ class _ProductReelsViewerState extends State<ProductReelsViewer> {
                   // More options
                   IconButton(
                     onPressed: () {},
-                    icon: const Icon(Icons.more_vert, color: Colors.white, size: 28),
+                    icon: const Icon(
+                      Icons.more_vert,
+                      color: Colors.white,
+                      size: 28,
+                    ),
                     style: IconButton.styleFrom(
                       backgroundColor: Colors.black.withOpacity(0.5),
                     ),
@@ -187,7 +192,10 @@ class _ProductReelPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final imageBytes = _getImageBytes();
-    final currencyFormat = NumberFormat.currency(symbol: 'MAD ', decimalDigits: 2);
+    final currencyFormat = NumberFormat.currency(
+      symbol: 'MAD ',
+      decimalDigits: 2,
+    );
     final qtyAvailable = _parseDouble(product.qty_available);
     final salePrice = _parseDouble(product.list_price);
 
@@ -197,21 +205,24 @@ class _ProductReelPage extends StatelessWidget {
         color: Colors.black,
         child: Stack(
           fit: StackFit.expand,
+          alignment: Alignment.center, // Centers all children within the Stack
           children: [
             // Product Image
-            imageBytes != null
-                ? InteractiveViewer(
-                    minScale: 1.0,
-                    maxScale: 3.0,
-                    child: Image.memory(
-                      imageBytes,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        return _buildPlaceholder();
-                      },
-                    ),
-                  )
-                : _buildPlaceholder(),
+            Positioned.fill(
+              child: imageBytes != null
+                  ? InteractiveViewer(
+                      minScale: 1.0,
+                      maxScale: 3.0,
+                      child: Image.memory(
+                        imageBytes,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return _buildPlaceholder();
+                        },
+                      ),
+                    )
+                  : _buildPlaceholder(),
+            ),
 
             // Bottom gradient overlay
             Positioned(
@@ -245,14 +256,11 @@ class _ProductReelPage extends StatelessWidget {
                             product.name ?? 'Unknown Product',
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 28,
+                              fontSize: 18,
                               fontWeight: FontWeight.bold,
                               height: 1.2,
                               shadows: [
-                                Shadow(
-                                  color: Colors.black,
-                                  blurRadius: 10,
-                                ),
+                                Shadow(color: Colors.black, blurRadius: 10),
                               ],
                             ),
                             maxLines: 2,
@@ -280,7 +288,8 @@ class _ProductReelPage extends StatelessWidget {
                                 child: _buildInfoCard(
                                   icon: Icons.inventory_2_rounded,
                                   label: 'In Stock',
-                                  value: '${qtyAvailable.toStringAsFixed(0)} ${product.uom_name ?? ""}',
+                                  value:
+                                      '${qtyAvailable.toStringAsFixed(0)} ${product.uom_name ?? ""}',
                                   color: qtyAvailable > 0
                                       ? Colors.blue
                                       : Colors.red,
@@ -307,7 +316,9 @@ class _ProductReelPage extends StatelessWidget {
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.white,
                                     foregroundColor: Colors.black,
-                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 13,
+                                    ),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
@@ -327,7 +338,7 @@ class _ProductReelPage extends StatelessWidget {
                                   foregroundColor: product.is_favorite == true
                                       ? Colors.red
                                       : Colors.black,
-                                  padding: const EdgeInsets.all(16),
+                                  padding: const EdgeInsets.all(13),
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -337,7 +348,7 @@ class _ProductReelPage extends StatelessWidget {
                                 style: IconButton.styleFrom(
                                   backgroundColor: Colors.white,
                                   foregroundColor: Colors.black,
-                                  padding: const EdgeInsets.all(16),
+                                  padding: const EdgeInsets.all(13),
                                 ),
                               ),
                             ],
@@ -352,29 +363,29 @@ class _ProductReelPage extends StatelessWidget {
 
             // Tap hint (when details are hidden)
             if (!showDetails)
-              Center(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.7),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.touch_app, color: Colors.white, size: 20),
-                      SizedBox(width: 8),
-                      Text(
-                        'Tap to show details',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
+              Positioned(
+                bottom: 100,
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.7),
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.touch_app, color: Colors.white, size: 20),
+                        SizedBox(width: 8),
+                        Text(
+                          'Tap to show details',
+                          style: TextStyle(color: Colors.white, fontSize: 14),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -388,11 +399,7 @@ class _ProductReelPage extends StatelessWidget {
     return Container(
       color: Colors.grey[900],
       child: const Center(
-        child: Icon(
-          Icons.inventory_2_outlined,
-          size: 120,
-          color: Colors.grey,
-        ),
+        child: Icon(Icons.inventory_2_outlined, size: 120, color: Colors.grey),
       ),
     );
   }
@@ -404,14 +411,11 @@ class _ProductReelPage extends StatelessWidget {
     required Color color,
   }) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.15),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.3),
-          width: 1,
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
         boxShadow: [
           BoxShadow(
             color: color.withOpacity(0.3),
@@ -420,33 +424,36 @@ class _ProductReelPage extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, color: color, size: 20),
+              Icon(icon, color: color, size: 17),
               const SizedBox(width: 6),
               Text(
                 label,
                 style: TextStyle(
                   color: Colors.white.withOpacity(0.8),
-                  fontSize: 12,
+                  fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+          Center(
+            child: Text(
+              value,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -461,10 +468,7 @@ class _ProductReelPage extends StatelessWidget {
         product.default_code != false &&
         product.default_code.toString().isNotEmpty) {
       chips.add(
-        _buildChip(
-          icon: Icons.tag,
-          text: product.default_code.toString(),
-        ),
+        _buildChip(icon: Icons.tag, text: product.default_code.toString()),
       );
     }
 
@@ -487,28 +491,19 @@ class _ProductReelPage extends StatelessWidget {
       final parts = categoryName.split('/');
       final shortName = parts.isNotEmpty ? parts.last.trim() : categoryName;
 
-      chips.add(
-        _buildChip(
-          icon: Icons.category,
-          text: shortName,
-        ),
-      );
+      chips.add(_buildChip(icon: Icons.category, text: shortName));
     }
 
-    // Active status
-    chips.add(
-      _buildChip(
-        icon: product.active == true ? Icons.check_circle : Icons.cancel,
-        text: product.active == true ? 'Active' : 'Inactive',
-        color: product.active == true ? Colors.green : Colors.red,
-      ),
-    );
+    // // Active status
+    // chips.add(
+    //   _buildChip(
+    //     icon: product.active == true ? Icons.check_circle : Icons.cancel,
+    //     text: product.active == true ? 'Active' : 'Inactive',
+    //     color: product.active == true ? Colors.green : Colors.red,
+    //   ),
+    // );
 
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: chips,
-    );
+    return Wrap(spacing: 8, runSpacing: 8, children: chips);
   }
 
   Widget _buildChip({
@@ -521,12 +516,11 @@ class _ProductReelPage extends StatelessWidget {
       decoration: BoxDecoration(
         color: (color ?? Colors.white).withOpacity(0.2),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: (color ?? Colors.white).withOpacity(0.3),
-        ),
+        border: Border.all(color: (color ?? Colors.white).withOpacity(0.3)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Icon(icon, size: 14, color: Colors.white),
           const SizedBox(width: 4),
