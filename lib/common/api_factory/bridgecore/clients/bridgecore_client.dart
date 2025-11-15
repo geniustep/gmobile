@@ -55,9 +55,15 @@ class BridgeCoreClient implements BaseApiClient {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
+          // إضافة Authorization Token
           if (_accessToken != null) {
             options.headers['Authorization'] = 'Bearer $_accessToken';
           }
+
+          // إضافة Headers الأساسية
+          options.headers['Content-Type'] = 'application/json';
+          options.headers['Accept'] = 'application/json';
+          options.headers['User-Agent'] = 'GMobile-Flutter-App/1.0';
 
           if (kDebugMode) {
             print('🚀 BridgeCore Request: ${options.method} ${options.path}');

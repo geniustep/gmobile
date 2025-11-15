@@ -1,8 +1,12 @@
 # تقرير دمج BridgeCore مع gmobile - نظام متوازي
 
 **التاريخ**: 2025-11-15
-**الإصدار**: 1.0
-**الحالة**: تم التنفيذ ✅
+**الإصدار**: 1.1
+**الحالة**: تم التنفيذ ومربوط بالإنتاج ✅
+
+**Production URL**: https://bridgecore.geniura.com
+**Database**: done
+**API Version**: v1
 
 ---
 

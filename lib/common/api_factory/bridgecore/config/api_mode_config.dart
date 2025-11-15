@@ -103,12 +103,15 @@ class ApiModeConfig {
 
   /// رابط BridgeCore API
   String get bridgeCoreUrl {
-    // يمكن تغيير هذا حسب البيئة
-    if (kDebugMode) {
-      return 'http://localhost:8000'; // Development
-    } else {
-      return 'https://api.bridgecore.example.com'; // Production
-    }
+    // Production URL - BridgeCore Middleware Server
+    return 'https://bridgecore.geniura.com';
+
+    // يمكن التبديل للـ Development إذا لزم الأمر:
+    // if (kDebugMode) {
+    //   return 'http://localhost:8000'; // Development
+    // } else {
+    //   return 'https://bridgecore.geniura.com'; // Production
+    // }
   }
 
   /// الـ URL الحالي المستخدم

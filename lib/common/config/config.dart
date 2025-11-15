@@ -14,6 +14,10 @@ class Config {
   /// SelfSignedCert:
   static const selfSignedCert = false;
 
+  /// BridgeCore Configuration
+  static const String bridgeCoreURL = "https://bridgecore.geniura.com";
+  static const String bridgeCoreDefaultDatabase = "done";
+
   /// API Config
   static const timeout = 90000;
   static const logNetworkRequest = true;
