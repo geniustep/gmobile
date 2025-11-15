@@ -63,6 +63,9 @@ import 'package:gsloution_mobile/src/presentation/screens/warehouse/warehouse_ma
 import 'package:gsloution_mobile/src/presentation/screens/warehouse/warehouse_sections/add_warehouse_section.dart';
 import 'package:gsloution_mobile/src/presentation/screens/warehouse_reports/warehouse_reports_main_screen.dart';
 import 'package:gsloution_mobile/src/screen/homepage.dart';
+import 'package:gsloution_mobile/src/presentation/screens/payment/payment_main_screen.dart';
+import 'package:gsloution_mobile/src/presentation/screens/payment/sections/create_payment_section.dart';
+import 'package:gsloution_mobile/src/presentation/screens/payment/sections/payment_detail_section.dart';
 
 class AppRoutes {
   static const String onboarding = "/onboarding";
@@ -130,6 +133,9 @@ class AppRoutes {
   static const String signIn = '/signIn';
   static const String partnerMaps = '/partnerMaps';
   static const String draftSales = '/draftSales';
+  static const String payments = '/payments';
+  static const String createPayment = '/createPayment';
+  static const String paymentDetail = '/paymentDetail';
 
   static final List<GetPage> pages = [
     GetPage(name: app, page: () => App(Get.arguments)),
@@ -237,5 +243,8 @@ class AppRoutes {
         );
       },
     ),
+    GetPage(name: payments, page: () => const PaymentMainScreen()),
+    GetPage(name: createPayment, page: () => const CreatePaymentSection()),
+    GetPage(name: paymentDetail, page: () => const PaymentDetailSection()),
   ];
 }
