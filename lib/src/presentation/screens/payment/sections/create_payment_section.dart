@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:gsloution_mobile/common/controllers/payment_controller.dart';
+import 'package:gsloution_mobile/common/controllers/invoice_controller.dart';
 import 'package:gsloution_mobile/common/config/prefs/pref_utils.dart';
 import 'package:gsloution_mobile/src/presentation/widgets/app_bar/custom_app_bar.dart';
 import 'package:gsloution_mobile/src/presentation/widgets/button/custom_elevated_button.dart';
@@ -18,6 +19,7 @@ class CreatePaymentSection extends StatefulWidget {
 
 class _CreatePaymentSectionState extends State<CreatePaymentSection> {
   final PaymentController paymentController = Get.find<PaymentController>();
+  final InvoiceController invoiceController = Get.put(InvoiceController());
   final _formKey = GlobalKey<FormState>();
 
   // Form Controllers
@@ -30,14 +32,18 @@ class _CreatePaymentSectionState extends State<CreatePaymentSection> {
   String selectedPartnerType = 'customer';
   dynamic selectedPartnerId;
   dynamic selectedJournalId;
+  dynamic selectedInvoiceId;
 
   List<Map<String, dynamic>> partnerItems = [];
   List<Map<String, dynamic>> journalItems = [];
+  List<Map<String, dynamic>> invoiceItems = [];
+  bool isLoadingInvoices = false;
 
   @override
   void initState() {
     super.initState();
     _loadData();
+    _loadInvoices();
     paymentDateController.text = DateTime.now().toString().split(' ')[0];
   }
 
@@ -58,6 +64,45 @@ class _CreatePaymentSectionState extends State<CreatePaymentSection> {
         final name = journal.name ?? 'Unknown Journal';
         return {'id': id, 'name': name};
       }).toList();
+    }
+  }
+
+  Future<void> _loadInvoices() async {
+    setState(() {
+      isLoadingInvoices = true;
+    });
+
+    // Get unpaid/partial invoices
+    await invoiceController.loadInvoices();
+
+    final unpaidInvoices = invoiceController.invoices
+        .where((invoice) =>
+          invoice.invoicePaymentState == 'not_paid' ||
+          invoice.invoicePaymentState == 'partial')
+        .toList();
+
+    setState(() {
+      invoiceItems = unpaidInvoices.map((invoice) {
+        final id = invoice.id;
+        final name = invoice.name ?? 'Invoice';
+        final amount = invoice.amountResidual ?? invoice.amountTotal ?? 0;
+        return {'id': id, 'name': '$name (\$$amount due)', 'amount': amount};
+      }).toList();
+      isLoadingInvoices = false;
+    });
+  }
+
+  void _onInvoiceSelected(dynamic invoiceId) {
+    final selectedInvoice = invoiceItems.firstWhere(
+      (inv) => inv['id'] == invoiceId,
+      orElse: () => {},
+    );
+
+    if (selectedInvoice.isNotEmpty) {
+      setState(() {
+        selectedInvoiceId = invoiceId;
+        amountController.text = selectedInvoice['amount'].toString();
+      });
     }
   }
 
@@ -141,6 +186,44 @@ class _CreatePaymentSectionState extends State<CreatePaymentSection> {
                 },
               ),
               const SizedBox(height: 20),
+
+              // Invoice Selection (optional - link payment to invoice)
+              if (!isLoadingInvoices && invoiceItems.isNotEmpty)
+                Column(
+                  children: [
+                    DropdownButtonFormField<dynamic>(
+                      value: selectedInvoiceId,
+                      decoration: const InputDecoration(
+                        labelText: 'Link to Invoice (Optional)',
+                        border: OutlineInputBorder(),
+                        helperText: 'Select invoice to pay',
+                      ),
+                      items: [
+                        const DropdownMenuItem(
+                          value: null,
+                          child: Text('No Invoice'),
+                        ),
+                        ...invoiceItems.map((invoice) {
+                          return DropdownMenuItem(
+                            value: invoice['id'],
+                            child: Text(invoice['name']),
+                          );
+                        }).toList(),
+                      ],
+                      onChanged: (value) {
+                        if (value != null) {
+                          _onInvoiceSelected(value);
+                        } else {
+                          setState(() {
+                            selectedInvoiceId = null;
+                            amountController.clear();
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
 
               // Amount
               TextFormField(
@@ -257,6 +340,11 @@ class _CreatePaymentSectionState extends State<CreatePaymentSection> {
         'communication': memoController.text,
       };
 
+      // Add invoice IDs if selected
+      if (selectedInvoiceId != null) {
+        paymentData['invoice_ids'] = [[6, 0, [selectedInvoiceId]]];
+      }
+
       final success = await paymentController.createPayment(
         paymentData: paymentData,
       );
@@ -265,7 +353,9 @@ class _CreatePaymentSectionState extends State<CreatePaymentSection> {
         SuccessToast.showSuccessToast(
           context,
           "Payment Created",
-          "Payment has been created successfully",
+          selectedInvoiceId != null
+              ? "Payment linked to invoice successfully"
+              : "Payment has been created successfully",
         );
         Get.back();
       }
