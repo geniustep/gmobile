@@ -353,11 +353,17 @@ class OfflineQueueManager {
   /// عدد الطلبات في الـ queue
   int get queueSize => _queue.length;
 
+  /// عدد الطلبات المعلقة (alias for queueSize)
+  int get pendingCount => _queue.length;
+
   /// هل الـ queue فارغة
   bool get isEmpty => _queue.isEmpty;
 
   /// هل جاري المزامنة
   bool get isSyncing => _isSyncing;
+
+  /// هل المزامنة التلقائية مفعلة
+  bool get isAutoSyncEnabled => _autoSyncTimer != null;
 
   /// الحصول على جميع الطلبات
   List<PendingRequest> getAllRequests() => List.unmodifiable(_queue);
@@ -365,6 +371,11 @@ class OfflineQueueManager {
   /// الحصول على طلبات بأولوية معينة
   List<PendingRequest> getRequestsByPriority(RequestPriority priority) {
     return _queue.where((r) => r.priority == priority).toList();
+  }
+
+  /// تصدير الـ queue كـ JSON
+  List<Map<String, dynamic>> exportQueue() {
+    return _queue.map((r) => r.toJson()).toList();
   }
 
   /// إحصائيات الـ queue

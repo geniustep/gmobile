@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gsloution_mobile/src/data/models/purchase_model/purchase_return_model.dart';
 import 'package:gsloution_mobile/src/presentation/screens/purchase/purchase_sections/edit_purchase_return_section.dart';
 import 'package:gsloution_mobile/src/presentation/widgets/toast/delete_toast.dart';
 
@@ -16,6 +15,19 @@ class PurchaseReturnListSection extends StatefulWidget {
 class _PurchaseReturnListSectionState extends State<PurchaseReturnListSection> {
   @override
   Widget build(BuildContext context) {
+    // TODO: استبدال هذا بقائمة من Odoo عندما يكون نموذج إرجاع الشراء متاحاً
+    final List<Map<String, dynamic>> purchaseReturnModel = [];
+
+    if (purchaseReturnModel.isEmpty) {
+      return const Center(
+        child: Text(
+          'No data available',
+          style: TextStyle(
+              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black54),
+        ),
+      );
+    }
+
     return ListView.builder(
       itemCount: purchaseReturnModel.length,
       itemBuilder: (context, index) {

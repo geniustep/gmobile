@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gsloution_mobile/src/data/models/products_model/product_unit_model.dart';
 import 'package:gsloution_mobile/src/presentation/screens/unit/unit_management_sections/update_unit_management_screen.dart';
 import 'package:gsloution_mobile/src/presentation/widgets/app_bar/custom_app_bar.dart';
 import 'package:gsloution_mobile/src/presentation/widgets/button/custom_elevated_button.dart';
@@ -18,7 +17,8 @@ class UnitManagementMainScreen extends StatefulWidget {
 }
 
 class _UnitManagementMainScreenState extends State<UnitManagementMainScreen> {
-  List<Map<String, dynamic>> unitList = List.from(productUnitModel);
+  // TODO: استبدال هذا بقائمة من Odoo عندما يكون نموذج الوحدات متاحاً
+  List<Map<String, dynamic>> unitList = [];
 
   @override
   Widget build(BuildContext context) {

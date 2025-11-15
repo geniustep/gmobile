@@ -153,7 +153,7 @@ class PermissionService extends GetxController {
       case 'expense':
         // Employees can only edit their own expenses
         if (userRole.value == UserRole.employee) {
-          return userId == PrefUtils.getUserId();
+          return userId == PrefUtils.user.value.uid;
         }
         return true;
       case 'product':
@@ -211,23 +211,4 @@ class PermissionService extends GetxController {
 }
 
 /// User roles enum
-enum UserRole {
-  admin,
-  manager,
-  accountant,
-  employee,
-}
-
-/// Extension for PrefUtils
-extension PrefUtilsPermission on PrefUtils {
-  static String? getUserRole() {
-    // This would typically be stored in SharedPreferences
-    // For now, return a default value
-    return 'employee';
-  }
-
-  static int? getUserId() {
-    // This would typically be stored in SharedPreferences
-    return null;
-  }
-}
+enum UserRole { admin, manager, accountant, employee }

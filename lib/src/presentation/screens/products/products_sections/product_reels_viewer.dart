@@ -208,7 +208,7 @@ class _ProductReelPage extends StatelessWidget {
           alignment: Alignment.center, // Centers all children within the Stack
           children: [
             // Product Image
-            Positioned.fill(
+            Positioned(
               child: imageBytes != null
                   ? InteractiveViewer(
                       minScale: 1.0,

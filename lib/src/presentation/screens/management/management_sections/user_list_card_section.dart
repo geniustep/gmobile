@@ -1,26 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gsloution_mobile/src/data/models/management_model/user_list_model.dart';
 import 'package:gsloution_mobile/src/presentation/screens/management/management_sections/update_user_section.dart';
 import 'package:gsloution_mobile/src/presentation/widgets/toast/delete_toast.dart';
 
 class UserListCardSection extends StatefulWidget {
-  const UserListCardSection({
-    super.key,
-  });
+  const UserListCardSection({super.key});
 
   @override
   State<UserListCardSection> createState() => _UserListCardSectionState();
 }
 
 class _UserListCardSectionState extends State<UserListCardSection> {
+  // TODO: استبدال هذا بقائمة من Odoo عندما يكون نموذج المستخدمين متاحاً
+  final List<Map<String, dynamic>> _users = [];
+
   @override
   Widget build(BuildContext context) {
+    if (_users.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.person_outline, size: 64, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            Text(
+              "No Users Found",
+              style: GoogleFonts.raleway(
+                fontWeight: FontWeight.w500,
+                fontSize: 24,
+                color: const Color(0xFF333333),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "User management will be available soon",
+              style: GoogleFonts.nunito(color: Colors.grey[600], fontSize: 14),
+            ),
+          ],
+        ),
+      );
+    }
+
     return ListView.builder(
-      itemCount: userListModel.length,
+      itemCount: _users.length,
       itemBuilder: (context, index) {
-        final user = userListModel[index];
+        final user = _users[index];
         return Container(
           margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           decoration: BoxDecoration(
@@ -55,23 +80,26 @@ class _UserListCardSectionState extends State<UserListCardSection> {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(30),
                         border: Border.all(
-                            color: Color(user["statusColor"]), width: 0.5),
+                          color: Color(user["statusColor"]),
+                          width: 0.5,
+                        ),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
-                            vertical: 5, horizontal: 10),
+                          vertical: 5,
+                          horizontal: 10,
+                        ),
                         child: Text(
                           user["status"],
                           style: GoogleFonts.nunito(
-                              color: Color(user["statusColor"])),
+                            color: Color(user["statusColor"]),
+                          ),
                         ),
                       ),
-                    )
+                    ),
                   ],
                 ),
-                const SizedBox(
-                  height: 20,
-                ),
+                const SizedBox(height: 20),
                 Row(
                   children: [
                     const Icon(
@@ -79,21 +107,17 @@ class _UserListCardSectionState extends State<UserListCardSection> {
                       size: 18,
                       color: Color(0xFFA0A0A3),
                     ),
-                    const SizedBox(
-                      width: 8,
-                    ),
+                    const SizedBox(width: 8),
                     Text(
                       user["email"],
                       style: GoogleFonts.nunito(
                         color: const Color(0xFFA0A0A3),
                         fontSize: 16,
                       ),
-                    )
+                    ),
                   ],
                 ),
-                const SizedBox(
-                  height: 8,
-                ),
+                const SizedBox(height: 8),
                 Row(
                   children: [
                     const Icon(
@@ -101,21 +125,17 @@ class _UserListCardSectionState extends State<UserListCardSection> {
                       size: 18,
                       color: Color(0xFFA0A0A3),
                     ),
-                    const SizedBox(
-                      width: 8,
-                    ),
+                    const SizedBox(width: 8),
                     Text(
                       user["phone"],
                       style: GoogleFonts.nunito(
                         color: const Color(0xFFA0A0A3),
                         fontSize: 16,
                       ),
-                    )
+                    ),
                   ],
                 ),
-                const SizedBox(
-                  height: 12,
-                ),
+                const SizedBox(height: 12),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -126,16 +146,15 @@ class _UserListCardSectionState extends State<UserListCardSection> {
                           "assets/icons/icon_svg/profile_name.svg",
                           width: 18,
                         ),
-                        const SizedBox(
-                          width: 8,
-                        ),
+                        const SizedBox(width: 8),
                         Text(
                           user["role"],
                           style: GoogleFonts.nunito(
-                              color: const Color(0xFF5D6571),
-                              fontWeight: FontWeight.w600,
-                              fontSize: 16),
-                        )
+                            color: const Color(0xFF5D6571),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
+                        ),
                       ],
                     ),
                     Row(
@@ -171,9 +190,11 @@ class _UserListCardSectionState extends State<UserListCardSection> {
                           child: IconButton(
                             onPressed: () {
                               DeleteToast.showDeleteToast(
-                                  context, user["name"]);
+                                context,
+                                user["name"],
+                              );
                               setState(() {
-                                userListModel.removeAt(index);
+                                _users.removeAt(index);
                               });
                             },
                             icon: SvgPicture.asset(
@@ -181,11 +202,11 @@ class _UserListCardSectionState extends State<UserListCardSection> {
                               color: Colors.red,
                             ),
                           ),
-                        )
+                        ),
                       ],
-                    )
+                    ),
                   ],
-                )
+                ),
               ],
             ),
           ),

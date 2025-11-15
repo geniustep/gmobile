@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
-import 'package:gsloution_mobile/common/services/offline/offline_queue_manager.dart';
+import 'package:gsloution_mobile/common/offline/offline_queue_manager.dart';
 import 'package:gsloution_mobile/common/services/error/error_handler_service.dart';
 
 /// Automatic synchronization service
@@ -81,10 +81,13 @@ class SyncService extends GetxController {
       isSyncing.value = true;
       syncStatus.value = 'syncing';
 
-      final operations = await OfflineQueueManager.getPendingOperations();
-      pendingOperations.value = operations.length;
+      // Load queue first
+      await OfflineQueueManager.instance.loadQueue();
+      
+      final requests = OfflineQueueManager.instance.getAllRequests();
+      pendingOperations.value = requests.length;
 
-      if (operations.isEmpty) {
+      if (requests.isEmpty) {
         if (kDebugMode) {
           print('$_tag No pending operations to sync');
         }
@@ -94,32 +97,32 @@ class SyncService extends GetxController {
       }
 
       if (kDebugMode) {
-        print('$_tag Syncing ${operations.length} operations');
+        print('$_tag Syncing ${requests.length} operations');
       }
 
       int successCount = 0;
       int failCount = 0;
 
-      for (var operation in operations) {
+      for (var request in requests) {
+        final operation = {
+          'id': request.id,
+          'type': request.operation,
+          'data': request.data,
+          'endpoint': request.model,
+        };
         final success = await _syncOperation(operation);
         if (success) {
           successCount++;
-          await OfflineQueueManager.markAsCompleted(operation['id']);
+          await OfflineQueueManager.instance.removeFromQueue(request.id);
         } else {
           failCount++;
-          await OfflineQueueManager.markAsFailed(
-            operation['id'],
-            'Sync failed',
-          );
+          // Request will be retried automatically by OfflineQueueManager
         }
       }
 
-      // Clear completed operations
-      await OfflineQueueManager.clearCompleted();
-
       // Update statistics
-      final stats = await OfflineQueueManager.getStatistics();
-      pendingOperations.value = stats['pending'] ?? 0;
+      final stats = OfflineQueueManager.instance.getStatistics();
+      pendingOperations.value = stats['total'] ?? 0;
 
       if (kDebugMode) {
         print('$_tag Sync completed: $successCount success, $failCount failed');
@@ -159,9 +162,9 @@ class SyncService extends GetxController {
   Future<bool> _syncOperation(Map<String, dynamic> operation) async {
     try {
       final type = operation['type'] as String;
-      final data = operation['data'] as Map<String, dynamic>;
+      // ignore: unused_local_variable
+      final data = operation['data'] as Map<String, dynamic>; // Will be used when implementing actual API calls
       final endpoint = operation['endpoint'] as String;
-      final method = operation['method'] as String;
 
       if (kDebugMode) {
         print('$_tag Syncing $type operation to $endpoint');
@@ -173,6 +176,7 @@ class SyncService extends GetxController {
 
       // Example of calling appropriate controller based on type
       switch (type) {
+        case 'create':
         case 'create_payment':
           // await PaymentController.createPayment(data);
           break;
@@ -181,6 +185,14 @@ class SyncService extends GetxController {
           break;
         case 'create_expense':
           // await ExpenseController.createExpense(data);
+          break;
+        case 'write':
+        case 'update':
+          // Update operation
+          break;
+        case 'unlink':
+        case 'delete':
+          // Delete operation
           break;
         case 'approve_expense':
           // await ExpenseController.approveExpense(data['id']);
@@ -213,13 +225,13 @@ class SyncService extends GetxController {
   }
 
   /// Get sync statistics
-  Future<Map<String, int>> getSyncStatistics() async {
-    return await OfflineQueueManager.getStatistics();
+  Future<Map<String, dynamic>> getSyncStatistics() async {
+    return OfflineQueueManager.instance.getStatistics();
   }
 
   /// Clear all sync data (use with caution)
   Future<void> clearSyncData() async {
-    await OfflineQueueManager.clearAll();
+    await OfflineQueueManager.instance.clearQueue();
     pendingOperations.value = 0;
     syncStatus.value = 'idle';
     if (kDebugMode) {

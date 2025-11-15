@@ -12,7 +12,8 @@ class ExpenseController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxBool isCreating = false.obs;
   final RxString searchQuery = ''.obs;
-  final RxString selectedFilter = 'all'.obs; // all, draft, reported, approved, done, refused
+  final RxString selectedFilter =
+      'all'.obs; // all, draft, reported, approved, done, refused
 
   // ============= Lifecycle =============
 
@@ -69,7 +70,9 @@ class ExpenseController extends GetxController {
       filteredExpenses.assignAll(expenses);
     } else {
       filteredExpenses.assignAll(
-        expenses.where((expense) => expense.state == selectedFilter.value).toList(),
+        expenses
+            .where((expense) => expense.state == selectedFilter.value)
+            .toList(),
       );
     }
 
@@ -145,7 +148,7 @@ class ExpenseController extends GetxController {
       bool success = false;
 
       await HrExpenseModule.submitExpenses(
-        args: [[expenseId]],
+        args: [expenseId],
         idBank: idBank,
         onResponse: (response) {
           if (response != null) {

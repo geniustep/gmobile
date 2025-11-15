@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gsloution_mobile/src/data/models/reports_model/purchase_report_model.dart';
-
 class HorizontalPurchaseReportTableSection extends StatelessWidget {
   const HorizontalPurchaseReportTableSection({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // TODO: استبدال هذا بقائمة من Odoo عندما يكون نموذج تقارير الشراء متاحاً
+    final List<Map<String, dynamic>> purchaseReportModel = [];
+
     if (purchaseReportModel.isEmpty) {
       return Center(
         child: Text(

@@ -24,6 +24,7 @@ class HiveService {
   static const String _stockPickingBox = 'stockPicking';
   static const String _accountMoveBox = 'accountMove';
   static const String _warehousesBox = 'warehouses';
+  static const String _cacheBox = 'cache';
   static const String _metadataBox = 'metadata'; // للتخزين التوقيت وغيره
 
   // ════════════════════════════════════════════════════════════
@@ -37,6 +38,7 @@ class HiveService {
   late Box<dynamic> stockPickingBox;
   late Box<dynamic> accountMoveBox;
   late Box<dynamic> warehousesBox;
+  late Box<dynamic> cacheBox;
   late Box<dynamic> metadataBox;
 
   bool _isInitialized = false;
@@ -80,6 +82,7 @@ class HiveService {
       stockPickingBox = await Hive.openBox(_stockPickingBox);
       accountMoveBox = await Hive.openBox(_accountMoveBox);
       warehousesBox = await Hive.openBox(_warehousesBox);
+      cacheBox = await Hive.openBox(_cacheBox);
       metadataBox = await Hive.openBox(_metadataBox);
 
       _isInitialized = true;
@@ -296,6 +299,9 @@ class HiveService {
       case 'warehouses':
         box = warehousesBox;
         break;
+      case 'cache':
+        box = cacheBox;
+        break;
       default:
         throw Exception('Unknown box: $boxName');
     }
@@ -324,11 +330,48 @@ class HiveService {
       case 'warehouses':
         box = warehousesBox;
         break;
+      case 'cache':
+        box = cacheBox;
+        break;
       default:
         throw Exception('Unknown box: $boxName');
     }
 
     return box.get(key);
+  }
+
+  /// مسح box معين
+  Future<void> clearBox(String boxName) async {
+    await _ensureInitialized();
+
+    Box box;
+    switch (boxName) {
+      case 'categories':
+        box = categoriesBox;
+        break;
+      case 'priceLists':
+        box = priceListsBox;
+        break;
+      case 'stockPicking':
+        box = stockPickingBox;
+        break;
+      case 'accountMove':
+        box = accountMoveBox;
+        break;
+      case 'warehouses':
+        box = warehousesBox;
+        break;
+      case 'cache':
+        box = cacheBox;
+        break;
+      default:
+        throw Exception('Unknown box: $boxName');
+    }
+
+    await box.clear();
+    if (kDebugMode) {
+      print('🗑️ Cleared box: $boxName');
+    }
   }
 
   // ════════════════════════════════════════════════════════════
@@ -510,6 +553,7 @@ class HiveService {
     await stockPickingBox.clear();
     await accountMoveBox.clear();
     await warehousesBox.clear();
+    await cacheBox.clear();
     await metadataBox.clear();
 
     if (kDebugMode) {

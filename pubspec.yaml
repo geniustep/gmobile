@@ -56,6 +56,8 @@ dependencies:
   dropdown_search: ^6.0.1
   rename_app: ^1.6.1
   crypto: ^3.0.5
+  flutter_secure_storage: ^9.2.2
+  open_file: ^3.5.4
  
   
 dev_dependencies:

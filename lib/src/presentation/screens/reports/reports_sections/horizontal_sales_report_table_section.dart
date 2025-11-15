@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gsloution_mobile/src/data/models/reports_model/sales_report_model.dart';
-
 class HorizontalSalesReportTableSection extends StatelessWidget {
   const HorizontalSalesReportTableSection({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // TODO: استبدال هذا بقائمة من Odoo عندما يكون نموذج تقارير المبيعات متاحاً
+    final List<Map<String, dynamic>> salesReportModel = [];
+
     if (salesReportModel.isEmpty) {
       return const Center(
         child: Text(

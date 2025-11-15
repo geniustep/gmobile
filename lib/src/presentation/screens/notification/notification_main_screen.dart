@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gsloution_mobile/src/data/models/notification_model/notification_model.dart';
 import 'package:gsloution_mobile/src/presentation/widgets/app_bar/custom_app_bar.dart';
 import 'package:gsloution_mobile/src/routes/app_routes.dart';
 
@@ -25,10 +24,45 @@ class NotificationMainScreen extends StatelessWidget {
   }
 
   Widget _buildNotificationList() {
+    // TODO: استبدال هذا بقائمة من Odoo عندما يكون نموذج الإشعارات متاحاً
+    final List<Map<String, dynamic>> notifications = [];
+
+    if (notifications.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.notifications_none,
+              size: 64,
+              color: Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              "No Notifications",
+              style: GoogleFonts.raleway(
+                fontWeight: FontWeight.w500,
+                fontSize: 24,
+                color: const Color(0xFF333333),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "You have no notifications at the moment",
+              style: GoogleFonts.nunito(
+                color: Colors.grey[600],
+                fontSize: 14,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     return ListView.builder(
-      itemCount: notificationModel.length,
+      itemCount: notifications.length,
       itemBuilder: (context, index) {
-        return _buildNotificationSection(notificationModel[index]);
+        return _buildNotificationSection(notifications[index]);
       },
     );
   }

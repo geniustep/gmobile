@@ -2,7 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:gsloution_mobile/src/data/services/draft_sale_service.dart';
+import 'package:gsloution_mobile/common/services/draft/draft_sale_service.dart';
 import 'package:gsloution_mobile/src/presentation/screens/sales/saleorder/create/controllers/controllers.dart';
 import 'package:gsloution_mobile/src/presentation/widgets/app_bar/custom_app_bar.dart';
 import 'package:gsloution_mobile/src/presentation/widgets/draft_indicators/draft_active_banner.dart';

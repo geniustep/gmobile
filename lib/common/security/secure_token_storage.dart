@@ -34,9 +34,11 @@ class SecureTokenStorage {
 
   static const String _sessionTokenKey = 'session_token';
   static const String _refreshTokenKey = 'refresh_token';
+  static const String _accessTokenKey = 'access_token';
   static const String _userIdKey = 'user_id';
   static const String _usernameKey = 'username';
   static const String _databaseKey = 'database';
+  static const String _systemIdKey = 'system_id';
   static const String _lastActivityKey = 'last_activity';
 
   // ════════════════════════════════════════════════════════════
@@ -44,7 +46,7 @@ class SecureTokenStorage {
   // ════════════════════════════════════════════════════════════
 
   /// حفظ Session Token
-  Future<void> saveSessionToken(String token) async {
+  static Future<void> saveSessionToken(String token) async {
     try {
       await _storage.write(key: _sessionTokenKey, value: token);
       await updateLastActivity();
@@ -61,7 +63,7 @@ class SecureTokenStorage {
   }
 
   /// الحصول على Session Token
-  Future<String?> getSessionToken() async {
+  static Future<String?> getSessionToken() async {
     try {
       return await _storage.read(key: _sessionTokenKey);
     } catch (e) {
@@ -73,7 +75,7 @@ class SecureTokenStorage {
   }
 
   /// حفظ Refresh Token
-  Future<void> saveRefreshToken(String token) async {
+  static Future<void> saveRefreshToken(String token) async {
     try {
       await _storage.write(key: _refreshTokenKey, value: token);
 
@@ -89,7 +91,7 @@ class SecureTokenStorage {
   }
 
   /// الحصول على Refresh Token
-  Future<String?> getRefreshToken() async {
+  static Future<String?> getRefreshToken() async {
     try {
       return await _storage.read(key: _refreshTokenKey);
     } catch (e) {
@@ -101,7 +103,7 @@ class SecureTokenStorage {
   }
 
   /// حذف Session Token
-  Future<void> deleteSessionToken() async {
+  static Future<void> deleteSessionToken() async {
     try {
       await _storage.delete(key: _sessionTokenKey);
 
@@ -116,7 +118,7 @@ class SecureTokenStorage {
   }
 
   /// حذف جميع Tokens
-  Future<void> deleteAllTokens() async {
+  static Future<void> deleteAllTokens() async {
     try {
       await _storage.deleteAll();
 
@@ -130,38 +132,82 @@ class SecureTokenStorage {
     }
   }
 
+  /// مسح جميع البيانات (alias for deleteAllTokens)
+  static Future<void> clearAll() async {
+    await deleteAllTokens();
+  }
+
+  /// مسح بيانات Session فقط
+  static Future<void> clearSession() async {
+    await deleteSessionToken();
+  }
+
   // ════════════════════════════════════════════════════════════
   // User Information
   // ════════════════════════════════════════════════════════════
 
   /// حفظ User ID
-  Future<void> saveUserId(String userId) async {
+  static Future<void> saveUserId(String userId) async {
     await _storage.write(key: _userIdKey, value: userId);
   }
 
   /// الحصول على User ID
-  Future<String?> getUserId() async {
+  static Future<String?> getUserId() async {
     return await _storage.read(key: _userIdKey);
   }
 
   /// حفظ Username
-  Future<void> saveUsername(String username) async {
+  static Future<void> saveUsername(String username) async {
     await _storage.write(key: _usernameKey, value: username);
   }
 
   /// الحصول على Username
-  Future<String?> getUsername() async {
+  static Future<String?> getUsername() async {
     return await _storage.read(key: _usernameKey);
   }
 
   /// حفظ Database Name
-  Future<void> saveDatabase(String database) async {
+  static Future<void> saveDatabase(String database) async {
     await _storage.write(key: _databaseKey, value: database);
   }
 
   /// الحصول على Database Name
-  Future<String?> getDatabase() async {
+  static Future<String?> getDatabase() async {
     return await _storage.read(key: _databaseKey);
+  }
+
+  /// حفظ Access Token
+  static Future<void> saveAccessToken(String token) async {
+    await _storage.write(key: _accessTokenKey, value: token);
+  }
+
+  /// الحصول على Access Token
+  static Future<String?> getAccessToken() async {
+    return await _storage.read(key: _accessTokenKey);
+  }
+
+  /// حفظ System ID
+  static Future<void> saveSystemId(String systemId) async {
+    await _storage.write(key: _systemIdKey, value: systemId);
+  }
+
+  /// الحصول على System ID
+  static Future<String?> getSystemId() async {
+    return await _storage.read(key: _systemIdKey);
+  }
+
+  /// حفظ Last Activity (مع DateTime)
+  static Future<void> saveLastActivity(DateTime dateTime) async {
+    await _storage.write(key: _lastActivityKey, value: dateTime.toIso8601String());
+  }
+
+  /// التحقق من صحة Token
+  static Future<bool> isValidToken(String token) async {
+    // التحقق من أن Token ليس فارغاً
+    if (token.isEmpty) return false;
+    
+    // يمكن إضافة المزيد من التحقق هنا (مثل JWT format)
+    return true;
   }
 
   // ════════════════════════════════════════════════════════════
@@ -169,13 +215,13 @@ class SecureTokenStorage {
   // ════════════════════════════════════════════════════════════
 
   /// تحديث آخر نشاط
-  Future<void> updateLastActivity() async {
+  static Future<void> updateLastActivity() async {
     final now = DateTime.now().toIso8601String();
     await _storage.write(key: _lastActivityKey, value: now);
   }
 
   /// الحصول على آخر نشاط
-  Future<DateTime?> getLastActivity() async {
+  static Future<DateTime?> getLastActivity() async {
     try {
       final activityStr = await _storage.read(key: _lastActivityKey);
       if (activityStr == null) return null;
@@ -190,7 +236,7 @@ class SecureTokenStorage {
   }
 
   /// حساب الوقت منذ آخر نشاط
-  Future<Duration?> getTimeSinceLastActivity() async {
+  static Future<Duration?> getTimeSinceLastActivity() async {
     final lastActivity = await getLastActivity();
     if (lastActivity == null) return null;
 
@@ -202,13 +248,13 @@ class SecureTokenStorage {
   // ════════════════════════════════════════════════════════════
 
   /// التحقق من وجود session نشط
-  Future<bool> hasActiveSession() async {
+  static Future<bool> hasActiveSession() async {
     final token = await getSessionToken();
     return token != null && token.isNotEmpty;
   }
 
   /// التحقق من انتهاء صلاحية Session (30 دقيقة)
-  Future<bool> isSessionExpired({
+  static Future<bool> isSessionExpired({
     Duration sessionTimeout = const Duration(minutes: 30),
   }) async {
     final timeSinceActivity = await getTimeSinceLastActivity();
@@ -218,7 +264,7 @@ class SecureTokenStorage {
   }
 
   /// التحقق من الحاجة لتحذير (25 دقيقة)
-  Future<bool> shouldShowSessionWarning({
+  static Future<bool> shouldShowSessionWarning({
     Duration warningThreshold = const Duration(minutes: 25),
   }) async {
     final timeSinceActivity = await getTimeSinceLastActivity();
@@ -232,7 +278,7 @@ class SecureTokenStorage {
   // ════════════════════════════════════════════════════════════
 
   /// الحصول على جميع المفاتيح المحفوظة
-  Future<Map<String, String>> getAllSecureData() async {
+  static Future<Map<String, String>> getAllSecureData() async {
     try {
       return await _storage.readAll();
     } catch (e) {
@@ -244,7 +290,7 @@ class SecureTokenStorage {
   }
 
   /// التحقق من وجود مفتاح معين
-  Future<bool> containsKey(String key) async {
+  static Future<bool> containsKey(String key) async {
     try {
       final value = await _storage.read(key: key);
       return value != null;
@@ -254,7 +300,7 @@ class SecureTokenStorage {
   }
 
   /// طباعة معلومات debug
-  Future<void> printDebugInfo() async {
+  static Future<void> printDebugInfo() async {
     if (!kDebugMode) return;
 
     print('═══════════════════════════════════════════════════════');
@@ -273,5 +319,27 @@ class SecureTokenStorage {
     print('Stored Keys: ${allKeys.keys.join(', ')}');
 
     print('═══════════════════════════════════════════════════════');
+  }
+
+  // ════════════════════════════════════════════════════════════
+  // Static Helper Methods (for tests compatibility)
+  // ════════════════════════════════════════════════════════════
+
+  static Future<void> saveUid(int uid) async {
+    await saveUserId(uid.toString());
+  }
+
+  static Future<int?> getUid() async {
+    final userId = await getUserId();
+    if (userId == null) return null;
+    return int.tryParse(userId);
+  }
+
+  static Future<void> saveDbName(String dbName) async {
+    await saveDatabase(dbName);
+  }
+
+  static Future<String?> getDbName() async {
+    return await getDatabase();
   }
 }

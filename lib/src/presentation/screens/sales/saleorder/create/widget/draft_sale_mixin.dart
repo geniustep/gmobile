@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:gsloution_mobile/src/data/services/draft_sale_service.dart';
+import 'package:gsloution_mobile/common/services/draft/draft_sale_service.dart';
 
 mixin DraftSaleMixin<T extends StatefulWidget> on State<T> {
   final DraftSaleService _draftService = DraftSaleService.instance;

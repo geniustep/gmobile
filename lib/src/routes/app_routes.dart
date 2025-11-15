@@ -1,33 +1,27 @@
 import 'package:gsloution_mobile/common/app.dart';
 import 'package:gsloution_mobile/common/config/import.dart';
-import 'package:gsloution_mobile/frontend/view/product/create/create_product.dart';
-import 'package:gsloution_mobile/frontend/view/product/view/product_template_view.dart';
-import 'package:gsloution_mobile/frontend/view/sales/sale_order_view.dart';
-import 'package:gsloution_mobile/src/authentication/views/signin.dart';
 import 'package:gsloution_mobile/src/presentation/screens/add_product/add_product_main_screen.dart';
 import 'package:gsloution_mobile/src/presentation/screens/add_user/add_user_main_screen.dart';
 import 'package:gsloution_mobile/src/presentation/screens/analytics/analytics_main_screen.dart';
 import 'package:gsloution_mobile/src/presentation/screens/authentication/forgot_password_screen.dart';
 import 'package:gsloution_mobile/src/presentation/screens/authentication/login_screen.dart';
 import 'package:gsloution_mobile/src/presentation/screens/authentication/contact_screen.dart';
-import 'package:gsloution_mobile/src/presentation/screens/biller/biller_main_screen.dart';
 import 'package:gsloution_mobile/src/presentation/screens/biller/biller_sections/create_biller_section.dart';
-import 'package:gsloution_mobile/src/presentation/screens/brand/brand_main_screen.dart';
+// import 'package:gsloution_mobile/src/presentation/screens/brand/brand_main_screen.dart'; // TODO: Uncomment when BrandMainScreen is implemented
 import 'package:gsloution_mobile/src/presentation/screens/category/category_main_screen.dart';
 import 'package:gsloution_mobile/src/presentation/screens/customer/customer_main_screen.dart';
 import 'package:gsloution_mobile/src/presentation/screens/customer/partner/create/create_partner_screen.dart';
-import 'package:gsloution_mobile/src/presentation/screens/customer/partner/create/create_partner_screen_simple.dart';
 import 'package:gsloution_mobile/src/presentation/screens/customer/partner/partner_map.dart';
-import 'package:gsloution_mobile/src/presentation/screens/customer_reports/customer_reports_main_screen.dart';
+// import 'package:gsloution_mobile/src/presentation/screens/customer_reports/customer_reports_main_screen.dart'; // TODO: Uncomment when CustomerReportsMainScreen is implemented
 import 'package:gsloution_mobile/src/presentation/screens/dashboard/dashboard_main_screen.dart';
-import 'package:gsloution_mobile/src/presentation/screens/discount_reports/discount_report_main_screen.dart';
+// import 'package:gsloution_mobile/src/presentation/screens/discount_reports/discount_report_main_screen.dart'; // TODO: Uncomment when DiscountReportMainScreen is implemented
 import 'package:gsloution_mobile/src/presentation/screens/expense/expense_main_screen.dart';
 import 'package:gsloution_mobile/src/presentation/screens/expense_category/expense_category_main_Screen.dart';
-import 'package:gsloution_mobile/src/presentation/screens/expense_invoice/expense_invoice_main_screen.dart';
+// import 'package:gsloution_mobile/src/presentation/screens/expense_invoice/expense_invoice_main_screen.dart'; // TODO: Uncomment when ExpenseInvoiceMainScreen is implemented
 import 'package:gsloution_mobile/src/presentation/screens/expense_invoice/expense_invoice_sections/add_expense_invoice_section.dart';
-import 'package:gsloution_mobile/src/presentation/screens/expense_list/expense_list_main_screen.dart';
+// import 'package:gsloution_mobile/src/presentation/screens/expense_list/expense_list_main_screen.dart'; // TODO: Uncomment when ExpenseListMainScreen is implemented
 import 'package:gsloution_mobile/src/presentation/screens/expense_payment/expense_payment_main_screen.dart';
-import 'package:gsloution_mobile/src/presentation/screens/expense_reports/expense_reports_main_screen.dart';
+// import 'package:gsloution_mobile/src/presentation/screens/expense_reports/expense_reports_main_screen.dart'; // TODO: Uncomment when ExpenseReportsMainScreen is implemented
 import 'package:gsloution_mobile/src/presentation/screens/invoice/invoice_main_screen.dart';
 import 'package:gsloution_mobile/src/presentation/screens/invoice/invoice_sections/add_sale_invoice_section.dart';
 import 'package:gsloution_mobile/src/presentation/screens/management/management_main_screen.dart';
@@ -37,7 +31,7 @@ import 'package:gsloution_mobile/src/presentation/screens/onboarding/onboarding_
 import 'package:gsloution_mobile/src/presentation/screens/payment_reports/payment_reports_main_screen.dart';
 import 'package:gsloution_mobile/src/presentation/screens/pos_sales/pos_sales_main_screen.dart';
 import 'package:gsloution_mobile/src/presentation/screens/sales/saleorder/drafts/draft_sales_screen.dart';
-import 'package:gsloution_mobile/src/presentation/screens/sales/salesSections/sales_return_section.dart';
+// import 'package:gsloution_mobile/src/presentation/screens/sales/salesSections/sales_return_section.dart'; // TODO: Uncomment when SalesReturnSection is implemented
 import 'package:gsloution_mobile/src/presentation/screens/products/products_main_screen.dart';
 import 'package:gsloution_mobile/src/presentation/screens/products_reports/products_reports_main_screen.dart';
 import 'package:gsloution_mobile/src/presentation/screens/profile/profile_main_screen.dart';
@@ -49,11 +43,11 @@ import 'package:gsloution_mobile/src/presentation/screens/sales/purchase_reports
 import 'package:gsloution_mobile/src/presentation/screens/reports/report_main_screen.dart';
 import 'package:gsloution_mobile/src/presentation/screens/sales/sales_main_screen.dart';
 import 'package:gsloution_mobile/src/presentation/screens/splash_screen/splash_screen.dart';
-import 'package:gsloution_mobile/src/presentation/screens/stock_reports/stock_reports_main_screen.dart';
-import 'package:gsloution_mobile/src/presentation/screens/supplier/supplier_main_screen.dart';
+// import 'package:gsloution_mobile/src/presentation/screens/stock_reports/stock_reports_main_screen.dart'; // TODO: Uncomment when StockReportsMainScreen is implemented
+// import 'package:gsloution_mobile/src/presentation/screens/supplier/supplier_main_screen.dart'; // TODO: Uncomment when SupplierMainScreen is implemented
 import 'package:gsloution_mobile/src/presentation/screens/supplier/supplier_sections/create_supplier_section.dart';
-import 'package:gsloution_mobile/src/presentation/screens/supplier_reports/supplier_reports_main_screen.dart';
-import 'package:gsloution_mobile/src/presentation/screens/support/support_main_screen.dart';
+// import 'package:gsloution_mobile/src/presentation/screens/supplier_reports/supplier_reports_main_screen.dart'; // TODO: Uncomment when SupplierReportsMainScreen is implemented
+// import 'package:gsloution_mobile/src/presentation/screens/support/support_main_screen.dart'; // TODO: Uncomment when SupportMainScreen is implemented
 import 'package:gsloution_mobile/src/presentation/screens/tax_report/tax_report_main_screen.dart';
 import 'package:gsloution_mobile/src/presentation/screens/unit/unit_management_main_screen.dart';
 import 'package:gsloution_mobile/src/presentation/screens/user_reports/user_reports_main_screen.dart';
@@ -62,7 +56,6 @@ import 'package:gsloution_mobile/src/presentation/screens/warehouse/inventory/st
 import 'package:gsloution_mobile/src/presentation/screens/warehouse/warehouse_main_screen.dart';
 import 'package:gsloution_mobile/src/presentation/screens/warehouse/warehouse_sections/add_warehouse_section.dart';
 import 'package:gsloution_mobile/src/presentation/screens/warehouse_reports/warehouse_reports_main_screen.dart';
-import 'package:gsloution_mobile/src/screen/homepage.dart';
 import 'package:gsloution_mobile/src/presentation/screens/payment/payment_main_screen.dart';
 import 'package:gsloution_mobile/src/presentation/screens/payment/sections/create_payment_section.dart';
 import 'package:gsloution_mobile/src/presentation/screens/payment/sections/payment_detail_section.dart';
@@ -145,11 +138,6 @@ class AppRoutes {
 
   static final List<GetPage> pages = [
     GetPage(name: app, page: () => App(Get.arguments)),
-    GetPage(name: homePage, page: () => const Homepage()),
-    GetPage(name: signIn, page: () => const SignIn()),
-    GetPage(name: product, page: () => const Products()),
-    GetPage(name: creatProduct, page: () => const CreateProducts()),
-    GetPage(name: sale, page: () => const SaleOrderView()),
     GetPage(name: onboarding, page: () => const OnboardingScreen()),
     GetPage(name: login, page: () => const LoginScreen()),
     GetPage(name: contactUs, page: () => const ContactScreen()),
@@ -167,10 +155,10 @@ class AppRoutes {
     GetPage(name: management, page: () => const ManagementMainScreen()),
     GetPage(name: warehouse, page: () => const WarehouseMainScreen()),
     GetPage(name: notification, page: () => const NotificationMainScreen()),
-    GetPage(name: support, page: () => const SupportMainScreen()),
+    // GetPage(name: support, page: () => const SupportMainScreen()), // TODO: Uncomment when SupportMainScreen is implemented
     GetPage(name: addProduct, page: () => const AddProductMainScreen()),
     GetPage(name: category, page: () => const CategoryMainScreen()),
-    GetPage(name: brand, page: () => const BrandMainScreen()),
+    // GetPage(name: brand, page: () => const BrandMainScreen()), // TODO: Uncomment when BrandMainScreen is implemented
     GetPage(name: unit, page: () => const UnitManagementMainScreen()),
     GetPage(name: draftSales, page: () => const DraftSalesScreen()),
     GetPage(
@@ -182,29 +170,29 @@ class AppRoutes {
       name: productsReports,
       page: () => const ProductsReportsMainScreen(),
     ),
-    GetPage(name: stockReports, page: () => const StockReportsMainScreen()),
-    GetPage(name: expenseReports, page: () => const ExpenseReportsMainScreen()),
+    // GetPage(name: stockReports, page: () => const StockReportsMainScreen()), // TODO: Uncomment when StockReportsMainScreen is implemented
+    // GetPage(name: expenseReports, page: () => const ExpenseReportsMainScreen()), // TODO: Uncomment when ExpenseReportsMainScreen is implemented
     GetPage(name: userReports, page: () => const UserReportsMainScreen()),
-    GetPage(
-      name: customerReports,
-      page: () => const CustomerReportsMainScreen(),
-    ),
+    // GetPage(
+    //   name: customerReports,
+    //   page: () => const CustomerReportsMainScreen(),
+    // ), // TODO: Uncomment when CustomerReportsMainScreen is implemented
     GetPage(
       name: warehouseReports,
       page: () => const WarehouseReportsMainScreen(),
     ),
-    GetPage(
-      name: supplierReports,
-      page: () => const SupplierReportsMainScreen(),
-    ),
-    GetPage(name: discountReport, page: () => const DiscountReportMainScreen()),
+    // GetPage(
+    //   name: supplierReports,
+    //   page: () => const SupplierReportsMainScreen(),
+    // ), // TODO: Uncomment when SupplierReportsMainScreen is implemented
+    // GetPage(name: discountReport, page: () => const DiscountReportMainScreen()), // TODO: Uncomment when DiscountReportMainScreen is implemented
     GetPage(name: taxReport, page: () => const TaxReportMainScreen()),
     GetPage(name: profile, page: () => const ProfileMainScreen()),
     GetPage(
       name: notificationContent,
       page: () => const NotificationContentScreen(),
     ),
-    GetPage(name: expenseList, page: () => const ExpenseListMainScreen()),
+    // GetPage(name: expenseList, page: () => const ExpenseListMainScreen()), // TODO: Uncomment when ExpenseListMainScreen is implemented
     GetPage(
       name: expenseCategory,
       page: () => const ExpenseCategoryMainScreen(),
@@ -213,8 +201,8 @@ class AppRoutes {
     GetPage(name: addWarehouse, page: () => const AddWarehouseSection()),
     GetPage(name: userRole, page: () => const UserRoleMainScreen()),
     GetPage(name: addUser, page: () => const AddUserMainScreen()),
-    GetPage(name: supplier, page: () => const SupplierMainScreen()),
-    GetPage(name: biller, page: () => const BillerMainScreen()),
+    // GetPage(name: supplier, page: () => const SupplierMainScreen()), // TODO: Uncomment when SupplierMainScreen is implemented
+    // GetPage(name: biller, page: () => const BillerMainScreen()), // TODO: Uncomment when BillerMainScreen is implemented
     // GetPage(name: createPartner, page: () => const CreatePartner()),
     GetPage(name: createPartner, page: () => const CreatePartnerScreen()),
     // GetPage(name: createPartner, page: () => const CreatePartnerScreenSimple()),
@@ -226,7 +214,7 @@ class AppRoutes {
       name: purchaseInvoice,
       page: () => const PurchaseInvoiceMainScreen(),
     ),
-    GetPage(name: expenseInvoice, page: () => const ExpenseInvoiceMainScreen()),
+    // GetPage(name: expenseInvoice, page: () => const ExpenseInvoiceMainScreen()), // TODO: Uncomment when ExpenseInvoiceMainScreen is implemented
     GetPage(name: addSaleInvoice, page: () => const AddSaleInvoiceSection()),
     GetPage(
       name: addPurchaseInvoice,
@@ -236,7 +224,7 @@ class AppRoutes {
       name: addExpenseInvoice,
       page: () => const AddExpenseInvoiceSection(),
     ),
-    GetPage(name: salesReturn, page: () => const SalesReturnSection()),
+    // GetPage(name: salesReturn, page: () => const SalesReturnSection()), // TODO: Uncomment when SalesReturnSection is implemented
     GetPage(name: splashScreen, page: () => const SplashScreen()),
     GetPage(
       name: partnerMaps,

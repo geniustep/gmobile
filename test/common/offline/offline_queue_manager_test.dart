@@ -21,8 +21,8 @@ void main() {
     test('should add request to queue', () async {
       final request = PendingRequest(
         id: '1',
-        method: 'POST',
-        endpoint: '/api/test',
+        operation: 'create',
+        model: 'test.model',
         data: {'key': 'value'},
       );
 
@@ -34,8 +34,8 @@ void main() {
     test('should remove request from queue after successful sync', () async {
       final request = PendingRequest(
         id: '1',
-        method: 'POST',
-        endpoint: '/api/test',
+        operation: 'create',
+        model: 'test.model',
         data: {'key': 'value'},
       );
 
@@ -49,16 +49,16 @@ void main() {
     test('should respect priority order in queue', () async {
       final lowPriorityRequest = PendingRequest(
         id: '1',
-        method: 'POST',
-        endpoint: '/api/low',
+        operation: 'create',
+        model: 'test.model',
         data: {},
         priority: RequestPriority.low,
       );
 
       final highPriorityRequest = PendingRequest(
         id: '2',
-        method: 'POST',
-        endpoint: '/api/high',
+        operation: 'create',
+        model: 'test.model',
         data: {},
         priority: RequestPriority.high,
       );
@@ -73,8 +73,8 @@ void main() {
     test('should limit retry attempts', () async {
       final request = PendingRequest(
         id: '1',
-        method: 'POST',
-        endpoint: '/api/test',
+        operation: 'create',
+        model: 'test.model',
         data: {},
         maxRetries: 3,
       );
@@ -86,19 +86,23 @@ void main() {
     });
 
     test('should clear all queued requests', () async {
-      await queueManager.addToQueue(PendingRequest(
-        id: '1',
-        method: 'POST',
-        endpoint: '/api/test1',
-        data: {},
-      ));
+      await queueManager.addToQueue(
+        PendingRequest(
+          id: '1',
+          operation: 'create',
+          model: 'test.model',
+          data: {},
+        ),
+      );
 
-      await queueManager.addToQueue(PendingRequest(
-        id: '2',
-        method: 'POST',
-        endpoint: '/api/test2',
-        data: {},
-      ));
+      await queueManager.addToQueue(
+        PendingRequest(
+          id: '2',
+          operation: 'update',
+          model: 'test.model',
+          data: {},
+        ),
+      );
 
       expect(queueManager.pendingCount, equals(2));
 
@@ -110,8 +114,8 @@ void main() {
     test('should export queued requests', () async {
       final request = PendingRequest(
         id: '1',
-        method: 'POST',
-        endpoint: '/api/test',
+        operation: 'create',
+        model: 'test.model',
         data: {'key': 'value'},
       );
 
@@ -129,8 +133,8 @@ void main() {
 
       final request = PendingRequest(
         id: '1',
-        method: 'POST',
-        endpoint: '/api/test',
+        operation: 'create',
+        model: 'test.model',
         data: {},
       );
 
@@ -138,23 +142,33 @@ void main() {
 
       final after = DateTime.now();
 
-      expect(request.createdAt.isAfter(before) || request.createdAt.isAtSameMomentAs(before), isTrue);
-      expect(request.createdAt.isBefore(after) || request.createdAt.isAtSameMomentAs(after), isTrue);
+      expect(
+        request.timestamp.isAfter(before) ||
+            request.timestamp.isAtSameMomentAs(before),
+        isTrue,
+      );
+      expect(
+        request.timestamp.isBefore(after) ||
+            request.timestamp.isAtSameMomentAs(after),
+        isTrue,
+      );
     });
 
-    test('should handle different HTTP methods', () async {
-      final getMethods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
+    test('should handle different operations', () async {
+      final operations = ['create', 'update', 'delete', 'write'];
 
-      for (final method in getMethods) {
-        await queueManager.addToQueue(PendingRequest(
-          id: method,
-          method: method,
-          endpoint: '/api/test',
-          data: {},
-        ));
+      for (final operation in operations) {
+        await queueManager.addToQueue(
+          PendingRequest(
+            id: operation,
+            operation: operation,
+            model: 'test.model',
+            data: {},
+          ),
+        );
       }
 
-      expect(queueManager.pendingCount, equals(getMethods.length));
+      expect(queueManager.pendingCount, equals(operations.length));
     });
 
     test('should start and stop auto sync', () {
@@ -173,16 +187,16 @@ void main() {
     test('should create request with all fields', () {
       final request = PendingRequest(
         id: '123',
-        method: 'POST',
-        endpoint: '/api/test',
+        operation: 'create',
+        model: 'test.model',
         data: {'key': 'value'},
         priority: RequestPriority.high,
         maxRetries: 5,
       );
 
       expect(request.id, equals('123'));
-      expect(request.method, equals('POST'));
-      expect(request.endpoint, equals('/api/test'));
+      expect(request.operation, equals('create'));
+      expect(request.model, equals('test.model'));
       expect(request.data, equals({'key': 'value'}));
       expect(request.priority, equals(RequestPriority.high));
       expect(request.maxRetries, equals(5));
@@ -192,16 +206,16 @@ void main() {
     test('should serialize to JSON', () {
       final request = PendingRequest(
         id: '1',
-        method: 'POST',
-        endpoint: '/api/test',
+        operation: 'create',
+        model: 'test.model',
         data: {'key': 'value'},
       );
 
       final json = request.toJson();
 
       expect(json['id'], equals('1'));
-      expect(json['method'], equals('POST'));
-      expect(json['endpoint'], equals('/api/test'));
+      expect(json['operation'], equals('create'));
+      expect(json['model'], equals('test.model'));
       expect(json['data'], equals({'key': 'value'}));
       expect(json['retryCount'], equals(0));
     });
@@ -209,20 +223,20 @@ void main() {
     test('should deserialize from JSON', () {
       final json = {
         'id': '1',
-        'method': 'POST',
-        'endpoint': '/api/test',
+        'operation': 'create',
+        'model': 'test.model',
         'data': {'key': 'value'},
-        'priority': 'high',
+        'timestamp': DateTime.now().toIso8601String(),
+        'priority': 2,
         'retryCount': 2,
         'maxRetries': 5,
-        'createdAt': DateTime.now().toIso8601String(),
       };
 
       final request = PendingRequest.fromJson(json);
 
       expect(request.id, equals('1'));
-      expect(request.method, equals('POST'));
-      expect(request.endpoint, equals('/api/test'));
+      expect(request.operation, equals('create'));
+      expect(request.model, equals('test.model'));
       expect(request.retryCount, equals(2));
       expect(request.maxRetries, equals(5));
     });

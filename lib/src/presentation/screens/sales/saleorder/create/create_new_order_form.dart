@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:gsloution_mobile/common/config/import.dart';
 import 'package:gsloution_mobile/common/config/prefs/pref_utils.dart';
 import 'package:gsloution_mobile/common/widgets/barcodeScannerPage.dart';
-import 'package:gsloution_mobile/src/data/services/draft_sale_service.dart';
+import 'package:gsloution_mobile/common/services/draft/draft_sale_service.dart';
 import 'package:gsloution_mobile/src/presentation/screens/sales/saleorder/create/controllers/controllers.dart';
 import 'package:gsloution_mobile/src/presentation/screens/sales/saleorder/create/services/services.dart';
 import 'package:gsloution_mobile/src/presentation/screens/sales/saleorder/create/widget/sales_quantity_selector.dart';

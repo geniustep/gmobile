@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gsloution_mobile/src/data/models/purchase_model/purchase_list_model.dart';
 import 'package:gsloution_mobile/src/presentation/screens/purchase/purchase_sections/add_payment_section.dart';
 import 'package:gsloution_mobile/src/presentation/screens/purchase/purchase_sections/edit_purchase_section.dart';
 import 'package:gsloution_mobile/src/presentation/screens/purchase/purchase_sections/view_payment_card_section.dart';
@@ -26,6 +25,9 @@ class _HorizontalPurchaseTableSectionState
 
   @override
   Widget build(BuildContext context) {
+    // TODO: استبدال هذا بقائمة من Odoo عندما يكون نموذج قائمة الشراء متاحاً
+    final List<Map<String, dynamic>> purchaseListModel = [];
+
     if (purchaseListModel.isEmpty) {
       return const Center(
         child: Text(

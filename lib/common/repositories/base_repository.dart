@@ -1,6 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:gsloution_mobile/common/services/error/error_handler_service.dart';
-import 'package:gsloution_mobile/common/services/offline/offline_queue_manager.dart';
+import 'package:gsloution_mobile/common/offline/offline_queue_manager.dart'
+    show OfflineQueueManager, PendingRequest, RequestPriority;
 import 'package:gsloution_mobile/common/services/audit/audit_log_service.dart';
 
 /// Base repository class
@@ -40,10 +40,14 @@ abstract class BaseRepository<T> {
 
     if (offline) {
       // Add to offline queue
-      await OfflineQueueManager.addOperation(
-        type: 'create_$entityName',
-        data: data,
-        endpoint: getCreateEndpoint(),
+      await OfflineQueueManager.instance.addToQueue(
+        PendingRequest(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          operation: 'create',
+          model: entityName,
+          data: data,
+          priority: RequestPriority.medium,
+        ),
       );
       return null;
     }
@@ -66,11 +70,14 @@ abstract class BaseRepository<T> {
 
     if (offline) {
       // Add to offline queue
-      await OfflineQueueManager.addOperation(
-        type: 'update_$entityName',
-        data: {...data, 'id': id},
-        endpoint: getUpdateEndpoint(id),
-        method: 'PUT',
+      await OfflineQueueManager.instance.addToQueue(
+        PendingRequest(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          operation: 'write',
+          model: entityName,
+          data: {...data, 'id': id},
+          priority: RequestPriority.medium,
+        ),
       );
       return null;
     }
@@ -92,11 +99,14 @@ abstract class BaseRepository<T> {
 
     if (offline) {
       // Add to offline queue
-      await OfflineQueueManager.addOperation(
-        type: 'delete_$entityName',
-        data: {'id': id},
-        endpoint: getDeleteEndpoint(id),
-        method: 'DELETE',
+      await OfflineQueueManager.instance.addToQueue(
+        PendingRequest(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          operation: 'unlink',
+          model: entityName,
+          data: {'id': id},
+          priority: RequestPriority.medium,
+        ),
       );
       return true;
     }

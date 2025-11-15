@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gsloution_mobile/src/data/models/invoice_model/purchase_invoice_model.dart';
 import 'package:gsloution_mobile/src/presentation/screens/purchase_invoice/purchase_sections/update_purchase_invoice_section.dart';
 import 'package:gsloution_mobile/src/presentation/widgets/toast/delete_toast.dart';
 
@@ -19,6 +18,19 @@ class _PurchaseInvoiceListSectionState
     extends State<PurchaseInvoiceListSection> {
   @override
   Widget build(BuildContext context) {
+    // TODO: استبدال هذا بقائمة من Odoo عندما يكون نموذج فواتير الشراء متاحاً
+    final List<Map<String, dynamic>> purchaseInvoiceModel = [];
+
+    if (purchaseInvoiceModel.isEmpty) {
+      return const Center(
+        child: Text(
+          'No data available',
+          style: TextStyle(
+              fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black54),
+        ),
+      );
+    }
+
     return ListView.builder(
       itemCount: purchaseInvoiceModel.length,
       itemBuilder: (context, index) {

@@ -215,16 +215,19 @@ class _ExpenseBodySectionState extends State<ExpenseBodySection> {
             const SizedBox(height: 20),
 
             // Submit Button
-            Obx(() => CustomElevatedButton(
-              buttonName: expenseController.isCreating.value
-                  ? "Submitting..."
-                  : "Submit Expense",
-              showToast: expenseController.isCreating.value
+            Obx(() {
+              final VoidCallback? onPressed = expenseController.isCreating.value
                   ? null
                   : () {
                       _createExpense();
-                    },
-            )),
+                    };
+              return CustomElevatedButton(
+                buttonName: expenseController.isCreating.value
+                    ? "Submitting..."
+                    : "Submit Expense",
+                showToast: onPressed,
+              );
+            }),
             const SizedBox(height: 20),
           ],
         ),

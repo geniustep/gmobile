@@ -20,7 +20,7 @@ import 'package:gsloution_mobile/common/storage/hive/entities/sale_order_entity.
 import 'package:gsloution_mobile/common/api_factory/models/product/product_model.dart';
 import 'package:gsloution_mobile/common/api_factory/models/partner/partner_model.dart';
 import 'package:gsloution_mobile/common/api_factory/models/order/sale_order_model.dart';
-import 'package:gsloution_mobile/src/authentication/models/user_model.dart';
+import 'package:gsloution_mobile/common/api_factory/models/user/user_model.dart';
 import 'dart:convert';
 
 class StorageService {

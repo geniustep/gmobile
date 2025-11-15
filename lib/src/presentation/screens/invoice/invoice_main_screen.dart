@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gsloution_mobile/common/controllers/invoice_controller.dart';
 import 'package:gsloution_mobile/src/presentation/screens/invoice/invoice_sections/sale_invoice_list_section.dart';
 import 'package:gsloution_mobile/src/presentation/widgets/drawer/dashboard_drawer.dart';
 import 'package:gsloution_mobile/src/presentation/widgets/floating_aciton_button/custom_floating_action_button.dart';
@@ -20,6 +21,7 @@ class InvoiceMainScreen extends StatefulWidget {
 class _InvoiceMainScreenState extends State<InvoiceMainScreen> {
   final controller = SidebarXController(selectedIndex: 1, extended: true);
   final GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
+  final InvoiceController invoiceController = Get.find<InvoiceController>();
 
   @override
   Widget build(BuildContext context) {
@@ -67,19 +69,24 @@ class _InvoiceMainScreenState extends State<InvoiceMainScreen> {
         ),
         body: Container(
           color: Colors.white70,
-          child: const Column(
+          child: Column(
             children: [
-              SizedBox(
+              const SizedBox(
                 height: 20,
               ),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: CustomSearchField(hintText: "Search Sale Invoice"),
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: CustomSearchField(
+                  hintText: "Search Sale Invoice",
+                  onChanged: (value) {
+                    invoiceController.search(value);
+                  },
+                ),
               ),
-              SizedBox(
+              const SizedBox(
                 height: 20,
               ),
-              Expanded(child: SaleInvoiceListSection())
+              const Expanded(child: SaleInvoiceListSection())
             ],
           ),
         ),

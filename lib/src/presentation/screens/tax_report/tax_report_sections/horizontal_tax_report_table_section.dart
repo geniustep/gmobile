@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gsloution_mobile/src/data/models/reports_model/tax_report_model.dart';
-
 class HorizontalTaxReportTableSection extends StatelessWidget {
   const HorizontalTaxReportTableSection({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // TODO: استبدال هذا بقائمة من Odoo عندما يكون نموذج تقارير الضرائب متاحاً
+    final List<Map<String, dynamic>> taxReportModel = [];
+
     if (taxReportModel.isEmpty) {
       return const Center(
         child: Text(

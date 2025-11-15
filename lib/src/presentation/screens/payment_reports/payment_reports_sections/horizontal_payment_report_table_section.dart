@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gsloution_mobile/src/data/models/reports_model/payment_report_model.dart';
-
 class HorizontalPaymentReportTableSection extends StatelessWidget {
   const HorizontalPaymentReportTableSection({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // TODO: استبدال هذا بقائمة من Odoo عندما يكون نموذج تقارير الدفع متاحاً
+    final List<Map<String, dynamic>> paymentReportModel = [];
+
     if (paymentReportModel.isEmpty) {
       return const Center(
         child: Text(

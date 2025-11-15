@@ -7,16 +7,14 @@ import 'package:gsloution_mobile/common/config/dependencies.dart';
 import 'package:gsloution_mobile/common/storage/storage_service.dart';
 import 'package:gsloution_mobile/common/storage/migration_service.dart';
 import 'package:gsloution_mobile/common/storage/hive/hive_service.dart';
-import 'package:gsloution_mobile/common/error/error_handler.dart';
+import 'package:gsloution_mobile/common/error/error_handler.dart'
+    show GlobalErrorHandler, AppError, ErrorSeverity;
 import 'package:gsloution_mobile/common/session/session_manager.dart';
 import 'package:gsloution_mobile/common/offline/offline_queue_manager.dart';
 import 'package:gsloution_mobile/common/analytics/analytics_service.dart';
 import 'package:gsloution_mobile/location.dart';
 
 void main() async {
-  // ✅ نقل ensureInitialized للأول
-  WidgetsFlutterBinding.ensureInitialized();
-
   // ✅ تفعيل Global Error Handler الجديد
   GlobalErrorHandler.setup();
 
@@ -29,6 +27,8 @@ void main() async {
   // ✅ استخدام runZonedGuarded لكل شيء
   runZonedGuarded(
     () async {
+      // ✅ تهيئة Flutter bindings داخل نفس الـ zone
+      WidgetsFlutterBinding.ensureInitialized();
       // 🚀 تهيئة الـ Storage الهجين (SharedPreferences + Hive)
       if (kDebugMode) {
         print('\n🚀 Initializing Hybrid Storage System...');
@@ -107,11 +107,12 @@ void main() async {
     },
     (error, stack) {
       // استخدام GlobalErrorHandler للأخطاء العامة
-      GlobalErrorHandler.instance.handleError(
+      GlobalErrorHandler.instance.recordError(
         AppError(
           message: error.toString(),
+          error: error,
           stackTrace: stack,
-          type: ErrorType.platform,
+          severity: ErrorSeverity.critical,
         ),
       );
     },

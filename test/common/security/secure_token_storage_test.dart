@@ -6,6 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gsloution_mobile/common/security/secure_token_storage.dart';
 
 void main() {
+  // تهيئة Flutter binding للاختبارات
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   group('SecureTokenStorage Tests', () {
     setUp(() {
       // تنظيف قبل كل اختبار

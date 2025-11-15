@@ -16,7 +16,6 @@ import 'package:get/get.dart';
 import 'package:gsloution_mobile/common/api_factory/api.dart';
 import 'package:gsloution_mobile/common/security/secure_token_storage.dart';
 import 'package:gsloution_mobile/common/utils/utils.dart';
-import 'package:gsloution_mobile/src/routes/app_routes.dart';
 
 class SessionManager {
   SessionManager._();
@@ -44,7 +43,22 @@ class SessionManager {
   bool _isWarningShown = false;
   bool _isMonitoring = false;
 
-  final SecureTokenStorage _storage = SecureTokenStorage.instance;
+  // Note: SecureTokenStorage methods are now static, no need for instance
+
+  /// هل الجلسة نشطة
+  bool get isActive => _isMonitoring;
+
+  /// الوقت المتبقي للجلسة
+  Future<Duration?> get remainingTime async {
+    if (!_isMonitoring) return null;
+
+    final timeSinceActivity =
+        await SecureTokenStorage.getTimeSinceLastActivity();
+    if (timeSinceActivity == null) return null;
+
+    final remaining = sessionDuration - timeSinceActivity;
+    return remaining.isNegative ? Duration.zero : remaining;
+  }
 
   // ════════════════════════════════════════════════════════════
   // Callbacks
@@ -71,7 +85,7 @@ class SessionManager {
     _isWarningShown = false;
 
     // تحديث آخر نشاط
-    _storage.updateLastActivity();
+    SecureTokenStorage.updateLastActivity();
 
     // بدء المؤقت
     _sessionTimer?.cancel();
@@ -97,7 +111,8 @@ class SessionManager {
   /// فحص حالة الجلسة
   Future<void> _checkSession() async {
     try {
-      final timeSinceActivity = await _storage.getTimeSinceLastActivity();
+      final timeSinceActivity =
+          await SecureTokenStorage.getTimeSinceLastActivity();
 
       if (timeSinceActivity == null) {
         if (kDebugMode) {
@@ -120,9 +135,7 @@ class SessionManager {
       if (kDebugMode) {
         final minutesRemaining =
             (sessionDuration - timeSinceActivity).inMinutes;
-        print(
-          '⏱️ Session check: ${minutesRemaining} minutes remaining',
-        );
+        print('⏱️ Session check: ${minutesRemaining} minutes remaining');
       }
     } catch (e) {
       if (kDebugMode) {
@@ -204,7 +217,7 @@ class SessionManager {
   /// مسح بيانات الجلسة
   Future<void> _clearSessionData() async {
     try {
-      await _storage.deleteAllTokens();
+      await SecureTokenStorage.deleteAllTokens();
 
       if (kDebugMode) {
         print('🗑️ Session data cleared');
@@ -220,8 +233,13 @@ class SessionManager {
   // Session Refresh
   // ════════════════════════════════════════════════════════════
 
-  /// تجديد الجلسة
+  /// تجديد الجلسة (alias for refreshSession)
   Future<void> refreshSession() async {
+    await _refreshSession();
+  }
+
+  /// تجديد الجلسة (internal)
+  Future<void> _refreshSession() async {
     try {
       showLoading();
 
@@ -231,7 +249,7 @@ class SessionManager {
       Api.getSessionInfo(
         onResponse: (response) async {
           // تحديث آخر نشاط
-          await _storage.updateLastActivity();
+          await SecureTokenStorage.updateLastActivity();
 
           // إعادة تعيين التحذير
           _isWarningShown = false;
@@ -288,7 +306,7 @@ class SessionManager {
   Future<void> recordActivity() async {
     if (!_isMonitoring) return;
 
-    await _storage.updateLastActivity();
+    await SecureTokenStorage.updateLastActivity();
 
     // إعادة تعيين التحذير إذا كان ظاهراً
     if (_isWarningShown) {
@@ -297,16 +315,21 @@ class SessionManager {
     }
   }
 
+  /// تحديث النشاط (alias for recordActivity)
+  Future<void> updateActivity() async {
+    await recordActivity();
+  }
+
   // ════════════════════════════════════════════════════════════
   // Session Validation
   // ════════════════════════════════════════════════════════════
 
   /// التحقق من صلاحية الجلسة الحالية
   Future<bool> isSessionValid() async {
-    final hasSession = await _storage.hasActiveSession();
+    final hasSession = await SecureTokenStorage.hasActiveSession();
     if (!hasSession) return false;
 
-    final isExpired = await _storage.isSessionExpired(
+    final isExpired = await SecureTokenStorage.isSessionExpired(
       sessionTimeout: sessionDuration,
     );
 
@@ -328,10 +351,11 @@ class SessionManager {
 
   /// الحصول على معلومات الجلسة
   Future<Map<String, dynamic>> getSessionInfo() async {
-    final hasSession = await _storage.hasActiveSession();
-    final isExpired = await _storage.isSessionExpired();
-    final timeSinceActivity = await _storage.getTimeSinceLastActivity();
-    final shouldWarn = await _storage.shouldShowSessionWarning();
+    final hasSession = await SecureTokenStorage.hasActiveSession();
+    final isExpired = await SecureTokenStorage.isSessionExpired();
+    final timeSinceActivity =
+        await SecureTokenStorage.getTimeSinceLastActivity();
+    final shouldWarn = await SecureTokenStorage.shouldShowSessionWarning();
 
     return {
       'hasSession': hasSession,
@@ -369,11 +393,10 @@ class SessionActivityTracker extends StatefulWidget {
   final Widget child;
 
   const SessionActivityTracker({Key? key, required this.child})
-      : super(key: key);
+    : super(key: key);
 
   @override
-  State<SessionActivityTracker> createState() =>
-      _SessionActivityTrackerState();
+  State<SessionActivityTracker> createState() => _SessionActivityTrackerState();
 }
 
 class _SessionActivityTrackerState extends State<SessionActivityTracker> {

@@ -31,7 +31,10 @@ class InvoiceController extends GetxController {
     try {
       isLoading.value = true;
 
-      domain ??= [];
+      // تصفية فواتير البيع فقط (out_invoice و out_refund)
+      domain ??= [
+        ['type', 'in', ['out_invoice', 'out_refund']]
+      ];
 
       await AccountMoveModule.searchReadAccountMove(
         onResponse: (response) {
@@ -39,7 +42,7 @@ class InvoiceController extends GetxController {
             invoices.assignAll(response);
             applyFilter();
             if (kDebugMode) {
-              print('✅ Loaded ${invoices.length} invoices');
+              print('✅ Loaded ${invoices.length} sale invoices');
             }
           }
           isLoading.value = false;

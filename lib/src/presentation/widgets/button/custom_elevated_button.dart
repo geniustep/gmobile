@@ -4,10 +4,10 @@ import 'package:gsloution_mobile/src/utils/contstants.dart';
 
 class CustomElevatedButton extends StatelessWidget {
   final String buttonName;
-  final Function showToast;
+  final Function? showToast;
 
   const CustomElevatedButton(
-      {super.key, required this.buttonName, required this.showToast});
+      {super.key, required this.buttonName, this.showToast});
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +16,7 @@ class CustomElevatedButton extends StatelessWidget {
           backgroundColor: ColorSchema.primaryColor,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-      onPressed: () => showToast(),
+      onPressed: showToast != null ? () => showToast!() : null,
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 14.0),
         child: Text(

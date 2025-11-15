@@ -749,7 +749,7 @@ class _HorizontalStockPickingTableSectionState
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
-                      picking.partnerId["display_name"]?.toString() ?? 'Client',
+                      picking.partnerId[1]?.toString() ?? 'Client',
                       style: GoogleFonts.raleway(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,

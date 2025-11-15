@@ -17,4 +17,5 @@ class PrefKeys {
   static const String stockPicking = "stockPicking";
   static const String stockMoveLines = "stockMoveLines";
   static const String warehouses = "warehouses";
+  static const String accountJournal = "accountJournal";
 }

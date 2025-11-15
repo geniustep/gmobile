@@ -1,15 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gsloution_mobile/common/config/import.dart';
 import 'package:gsloution_mobile/src/presentation/screens/expense_category/expense_category_sections/expense_category_update_section.dart';
 import 'package:gsloution_mobile/src/presentation/widgets/toast/delete_toast.dart';
 
 class ExpenseCategoryListSection extends StatefulWidget {
   final dynamic isSmallScreen;
-  final dynamic categoryList;
+  final List<ProductCategoryModel> categoryList;
 
-  const ExpenseCategoryListSection(
-      {super.key, required this.isSmallScreen, required this.categoryList});
+  const ExpenseCategoryListSection({
+    super.key,
+    required this.isSmallScreen,
+    required this.categoryList,
+  });
 
   @override
   State<ExpenseCategoryListSection> createState() =>
@@ -18,30 +23,69 @@ class ExpenseCategoryListSection extends StatefulWidget {
 
 class _ExpenseCategoryListSectionState
     extends State<ExpenseCategoryListSection> {
+  String _getCategoryDisplayName(ProductCategoryModel category) {
+    if (category.displayName != null && category.displayName != false) {
+      return category.displayName.toString();
+    }
+    if (category.name != null && category.name != false) {
+      return category.name.toString();
+    }
+    return 'غير محدد';
+  }
+
+  String _getParentCategoryName(ProductCategoryModel category) {
+    if (category.parentId == null || category.parentId == false) {
+      return 'فئة رئيسية';
+    }
+
+    if (category.parentId is List && (category.parentId as List).length > 1) {
+      return (category.parentId as List)[1]?.toString() ?? 'فئة رئيسية';
+    }
+
+    if (category.parentId is int) {
+      final parentId = category.parentId as int;
+      final parent = widget.categoryList.firstWhereOrNull(
+        (cat) => cat.id == parentId,
+      );
+      if (parent != null) {
+        return _getCategoryDisplayName(parent);
+      }
+    }
+
+    return 'فئة رئيسية';
+  }
+
   @override
   Widget build(BuildContext context) {
     if (widget.categoryList.isEmpty) {
       return Expanded(
-          child: Center(
-              child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Image.asset(
-            "assets/images/other/empty_product.png",
-            width: 350,
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(
+                "assets/images/other/empty_product.png",
+                width: 350,
+              ),
+              Text(
+                "No Expense Category Found",
+                style: GoogleFonts.raleway(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 24,
+                  color: const Color(0xFF333333),
+                ),
+              ),
+            ],
           ),
-          Text(
-            "No Category Found",
-            style: GoogleFonts.raleway(
-                fontWeight: FontWeight.w500,
-                fontSize: 24,
-                color: const Color(0xFF333333)),
-          )
-        ],
-      )));
+        ),
+      );
     } else {
       return Expanded(
-        child: ListView.builder(
+        child: RefreshIndicator(
+          onRefresh: () async {
+            // يمكن إضافة refresh logic هنا
+          },
+          child: ListView.builder(
             padding: EdgeInsets.zero,
             shrinkWrap: true,
             itemCount: widget.categoryList.length,
@@ -51,8 +95,15 @@ class _ExpenseCategoryListSectionState
                 children: [
                   ListTile(
                     contentPadding: EdgeInsets.zero,
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.orange.shade100,
+                      child: Icon(
+                        Icons.receipt_long,
+                        color: Colors.orange.shade700,
+                      ),
+                    ),
                     title: Text(
-                      category["category-name"],
+                      _getCategoryDisplayName(category),
                       style: GoogleFonts.raleway(
                         fontWeight: FontWeight.w700,
                         fontSize: 16,
@@ -60,12 +111,30 @@ class _ExpenseCategoryListSectionState
                       ),
                     ),
                     subtitle: Padding(
-                      padding: const EdgeInsets.only(
-                        top: 10,
-                      ),
-                      child: Text(
-                        category["subCategory-name"],
-                        style: GoogleFonts.nunito(),
+                      padding: const EdgeInsets.only(top: 10),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _getParentCategoryName(category),
+                            style: GoogleFonts.nunito(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          if (category.productCount != null &&
+                              category.productCount != false)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Text(
+                                'عدد المنتجات: ${category.productCount}',
+                                style: GoogleFonts.nunito(
+                                  fontSize: 12,
+                                  color: Colors.grey[500],
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                     trailing: Row(
@@ -91,9 +160,7 @@ class _ExpenseCategoryListSectionState
                             },
                           ),
                         ),
-                        const SizedBox(
-                          width: 10,
-                        ),
+                        const SizedBox(width: 10),
                         Container(
                           width: 40,
                           height: 40,
@@ -103,11 +170,7 @@ class _ExpenseCategoryListSectionState
                           ),
                           child: IconButton(
                             onPressed: () {
-                              setState(() {
-                                DeleteToast.showDeleteToast(
-                                    context, category["category-name"]);
-                                widget.categoryList.removeAt(index);
-                              });
+                              _deleteCategory(context, category, index);
                             },
                             icon: SvgPicture.asset(
                               "assets/icons/icon_svg/delete_icon.svg",
@@ -118,15 +181,55 @@ class _ExpenseCategoryListSectionState
                       ],
                     ),
                   ),
-                  const Divider(color: Color(0xFFE2E4E7))
+                  const Divider(color: Color(0xFFE2E4E7)),
                 ],
               );
-            }),
+            },
+          ),
+        ),
       );
     }
   }
 
-  void buildModalBottomSheet(BuildContext context, category) {
+  void _deleteCategory(
+    BuildContext context,
+    ProductCategoryModel category,
+    int index,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('حذف فئة المصروف'),
+        content: Text(
+          'هل أنت متأكد من حذف "${_getCategoryDisplayName(category)}"؟',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('إلغاء'),
+          ),
+          TextButton(
+            onPressed: () {
+              // TODO: إضافة منطق حذف من Odoo
+              DeleteToast.showDeleteToast(
+                context,
+                _getCategoryDisplayName(category),
+              );
+              Navigator.pop(context);
+              // يمكن إزالة من القائمة مؤقتاً
+              // widget.categoryList.removeAt(index);
+            },
+            child: const Text(
+              'حذف',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void buildModalBottomSheet(BuildContext context, ProductCategoryModel category) {
     showModalBottomSheet(
       backgroundColor: Colors.white,
       elevation: 0,

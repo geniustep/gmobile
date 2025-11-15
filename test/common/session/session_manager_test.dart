@@ -6,6 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:gsloution_mobile/common/session/session_manager.dart';
 
 void main() {
+  // تهيئة Flutter binding للاختبارات
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   group('SessionManager Tests', () {
     late SessionManager sessionManager;
 
@@ -33,7 +36,7 @@ void main() {
     test('should calculate remaining time correctly', () async {
       sessionManager.startMonitoring();
 
-      final remainingTime = sessionManager.remainingTime;
+      final remainingTime = await sessionManager.remainingTime;
 
       expect(remainingTime, isNotNull);
       expect(remainingTime!.inMinutes, lessThanOrEqualTo(30));
@@ -46,11 +49,11 @@ void main() {
       // الانتظار قليلاً
       await Future.delayed(const Duration(seconds: 2));
 
-      final timeBefore = sessionManager.remainingTime;
+      final timeBefore = await sessionManager.remainingTime;
 
       await sessionManager.refreshSession();
 
-      final timeAfter = sessionManager.remainingTime;
+      final timeAfter = await sessionManager.remainingTime;
 
       // بعد التحديث يجب أن يكون الوقت المتبقي أكبر
       expect(timeAfter, isNotNull);
@@ -61,13 +64,13 @@ void main() {
     test('should update last activity on user interaction', () async {
       sessionManager.startMonitoring();
 
-      final timeBefore = sessionManager.remainingTime;
+      final timeBefore = await sessionManager.remainingTime;
 
       await Future.delayed(const Duration(seconds: 2));
 
-      sessionManager.updateActivity();
+      await sessionManager.updateActivity();
 
-      final timeAfter = sessionManager.remainingTime;
+      final timeAfter = await sessionManager.remainingTime;
 
       expect(timeAfter, isNotNull);
       expect(timeBefore, isNotNull);
@@ -90,7 +93,8 @@ void main() {
       await sessionManager.refreshSession();
       await sessionManager.refreshSession();
 
-      expect(sessionManager.remainingTime, isNotNull);
+      final remainingTime = await sessionManager.remainingTime;
+      expect(remainingTime, isNotNull);
       expect(sessionManager.isActive, isTrue);
     });
   });

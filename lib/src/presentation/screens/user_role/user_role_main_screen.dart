@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gsloution_mobile/src/data/models/management_model/user_role_model.dart';
 import 'package:gsloution_mobile/src/presentation/screens/user_role/user_role_sections/user_role_update_section.dart';
 import 'package:gsloution_mobile/src/presentation/widgets/app_bar/custom_app_bar.dart';
 import 'package:gsloution_mobile/src/presentation/widgets/button/custom_elevated_button.dart';
@@ -75,9 +74,9 @@ class _UserRoleMainScreenState extends State<UserRoleMainScreen> {
             Expanded(
                 child: ListView.builder(
               padding: EdgeInsets.zero,
-              itemCount: userRoleModel.length,
+              itemCount: 0, // TODO: استبدال بقائمة من Odoo عندما يكون نموذج أدوار المستخدمين متاحاً
               itemBuilder: (context, index) {
-                final userRole = userRoleModel[index];
+                final userRole = <String, dynamic>{}; // Placeholder
                 return Container(
                   margin:
                       const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -167,7 +166,8 @@ class _UserRoleMainScreenState extends State<UserRoleMainScreen> {
                                   DeleteToast.showDeleteToast(
                                       context, userRole["role"]);
                                   setState(() {
-                                    userRoleModel.removeAt(index);
+                                    // TODO: إزالة من Odoo عندما يكون النموذج متاحاً
+                                    // userRoleModel.removeAt(index);
                                   });
                                 },
                                 icon: SvgPicture.asset(

@@ -14,6 +14,7 @@
 // ════════════════════════════════════════════════════════════
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:gsloution_mobile/common/logging/app_logger.dart';
 
 // ════════════════════════════════════════════════════════════
@@ -25,17 +26,14 @@ class AnalyticsEvent {
   final Map<String, dynamic>? parameters;
   final DateTime timestamp;
 
-  AnalyticsEvent({
-    required this.name,
-    this.parameters,
-    DateTime? timestamp,
-  }) : timestamp = timestamp ?? DateTime.now();
+  AnalyticsEvent({required this.name, this.parameters, DateTime? timestamp})
+    : timestamp = timestamp ?? DateTime.now();
 
   Map<String, dynamic> toJson() => {
-        'name': name,
-        'parameters': parameters ?? {},
-        'timestamp': timestamp.toIso8601String(),
-      };
+    'name': name,
+    'parameters': parameters ?? {},
+    'timestamp': timestamp.toIso8601String(),
+  };
 }
 
 // ════════════════════════════════════════════════════════════
@@ -247,7 +245,9 @@ class AnalyticsService {
     }
 
     if (kDebugMode) {
-      print('📊 Analytics Service initialized with ${_providers.length} provider(s)');
+      print(
+        '📊 Analytics Service initialized with ${_providers.length} provider(s)',
+      );
     }
   }
 
@@ -256,10 +256,7 @@ class AnalyticsService {
   // ════════════════════════════════════════════════════════════
 
   /// تسجيل حدث
-  Future<void> logEvent(
-    String name, {
-    Map<String, dynamic>? parameters,
-  }) async {
+  Future<void> logEvent(String name, {Map<String, dynamic>? parameters}) async {
     if (!_isEnabled) return;
 
     for (final provider in _providers) {
@@ -289,10 +286,7 @@ class AnalyticsService {
   }
 
   /// تسجيل خطأ
-  Future<void> logError(
-    String error, {
-    StackTrace? stackTrace,
-  }) async {
+  Future<void> logError(String error, {StackTrace? stackTrace}) async {
     if (!_isEnabled) return;
 
     for (final provider in _providers) {
@@ -346,9 +340,7 @@ class AnalyticsService {
 
   /// تسجيل تسجيل الدخول
   Future<void> logLogin({String? method}) async {
-    await logEvent('login', parameters: {
-      if (method != null) 'method': method,
-    });
+    await logEvent('login', parameters: {if (method != null) 'method': method});
   }
 
   /// تسجيل تسجيل الخروج
@@ -358,17 +350,15 @@ class AnalyticsService {
 
   /// تسجيل البحث
   Future<void> logSearch(String query) async {
-    await logEvent('search', parameters: {
-      'search_term': query,
-    });
+    await logEvent('search', parameters: {'search_term': query});
   }
 
   /// تسجيل عرض منتج
   Future<void> logViewProduct(String productId, String productName) async {
-    await logEvent('view_item', parameters: {
-      'item_id': productId,
-      'item_name': productName,
-    });
+    await logEvent(
+      'view_item',
+      parameters: {'item_id': productId, 'item_name': productName},
+    );
   }
 
   /// تسجيل إضافة إلى السلة
@@ -377,11 +367,14 @@ class AnalyticsService {
     String productName,
     double price,
   ) async {
-    await logEvent('add_to_cart', parameters: {
-      'item_id': productId,
-      'item_name': productName,
-      'price': price,
-    });
+    await logEvent(
+      'add_to_cart',
+      parameters: {
+        'item_id': productId,
+        'item_name': productName,
+        'price': price,
+      },
+    );
   }
 
   /// تسجيل إتمام عملية شراء
@@ -390,11 +383,14 @@ class AnalyticsService {
     required double value,
     String? currency,
   }) async {
-    await logEvent('purchase', parameters: {
-      'transaction_id': orderId,
-      'value': value,
-      if (currency != null) 'currency': currency,
-    });
+    await logEvent(
+      'purchase',
+      parameters: {
+        'transaction_id': orderId,
+        'value': value,
+        if (currency != null) 'currency': currency,
+      },
+    );
   }
 
   /// تسجيل مشاركة
@@ -402,10 +398,10 @@ class AnalyticsService {
     required String contentType,
     required String itemId,
   }) async {
-    await logEvent('share', parameters: {
-      'content_type': contentType,
-      'item_id': itemId,
-    });
+    await logEvent(
+      'share',
+      parameters: {'content_type': contentType, 'item_id': itemId},
+    );
   }
 
   /// تسجيل فتح التطبيق
@@ -424,12 +420,15 @@ class AnalyticsService {
     required int statusCode,
     required int duration,
   }) async {
-    await logEvent('api_call', parameters: {
-      'endpoint': endpoint,
-      'method': method,
-      'status_code': statusCode,
-      'duration_ms': duration,
-    });
+    await logEvent(
+      'api_call',
+      parameters: {
+        'endpoint': endpoint,
+        'method': method,
+        'status_code': statusCode,
+        'duration_ms': duration,
+      },
+    );
   }
 
   /// تسجيل API Error
@@ -437,10 +436,10 @@ class AnalyticsService {
     required String endpoint,
     required String error,
   }) async {
-    await logEvent('api_error', parameters: {
-      'endpoint': endpoint,
-      'error': error,
-    });
+    await logEvent(
+      'api_error',
+      parameters: {'endpoint': endpoint, 'error': error},
+    );
   }
 
   // ════════════════════════════════════════════════════════════
@@ -452,11 +451,14 @@ class AnalyticsService {
     required String fromMode,
     required String toMode,
   }) async {
-    await logEvent('api_mode_switch', parameters: {
-      'from_mode': fromMode,
-      'to_mode': toMode,
-      'timestamp': DateTime.now().toIso8601String(),
-    });
+    await logEvent(
+      'api_mode_switch',
+      parameters: {
+        'from_mode': fromMode,
+        'to_mode': toMode,
+        'timestamp': DateTime.now().toIso8601String(),
+      },
+    );
   }
 
   // ════════════════════════════════════════════════════════════

@@ -3,6 +3,7 @@ import 'package:gsloution_mobile/common/api_factory/models/product/product_list/
 import 'package:gsloution_mobile/common/api_factory/models/stock/stock_picking/stock_picking_model.dart';
 import 'package:gsloution_mobile/common/api_factory/models/stock/stock_move_line/stock_move_line_model.dart';
 import 'package:gsloution_mobile/common/api_factory/models/stock/stock_warehouse/stock_warehouse_model.dart';
+import 'package:gsloution_mobile/common/api_factory/models/invoice/account_journal/account_journal_model.dart';
 import 'package:gsloution_mobile/common/config/import.dart';
 import 'package:gsloution_mobile/common/config/prefs/pref_keys.dart';
 import 'package:gsloution_mobile/common/config/hive/hive_products.dart';
@@ -12,7 +13,7 @@ import 'package:gsloution_mobile/common/config/hive/hive_account_moves.dart';
 import 'package:gsloution_mobile/common/config/hive/hive_stock_picking.dart';
 import 'package:gsloution_mobile/common/config/hive/hive_warehouses.dart';
 import 'package:gsloution_mobile/common/utils/security_helper.dart';
-import 'package:gsloution_mobile/src/authentication/models/user_model.dart';
+import 'package:gsloution_mobile/common/api_factory/models/user/user_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PrefUtils {
@@ -33,6 +34,7 @@ class PrefUtils {
   static RxList<StockPickingModel> get stockPicking => HiveStockPicking.stockPicking;
   static var stockMoveLines = <StockMoveLineModel>[].obs;
   static RxList<StockWarehouseModel> get warehouses => HiveWarehouses.warehouses;
+  static var accountJournal = <AccountJournalModel>[].obs;
   static List<dynamic> conditionsPaiement = [];
 
   static Future<void> initPreferences() async {
@@ -112,6 +114,46 @@ class PrefUtils {
     );
     user.value = UserModel.fromJson(getUser);
     return user.value;
+  }
+
+  /// Get user role from stored user data
+  static String? getUserRole() {
+    try {
+      // Try to get role from user model
+      if (user.value.uid != null) {
+        // Check if user is admin
+        if (user.value.isAdmin == true) {
+          return 'admin';
+        }
+        // You can add more role logic here based on your backend
+        // For now, default to employee
+        return 'employee';
+      }
+      return null;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting user role: $e');
+      }
+      return null;
+    }
+  }
+
+  /// Get user ID from stored user data
+  static int? getUserId() {
+    try {
+      final uid = user.value.uid;
+      if (uid is int) {
+        return uid;
+      } else if (uid is String) {
+        return int.tryParse(uid);
+      }
+      return null;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error getting user ID: $e');
+      }
+      return null;
+    }
   }
 
   // Partners - باستخدام HivePartners
@@ -364,5 +406,30 @@ class PrefUtils {
 
   static Future<RxList<StockWarehouseModel>> getWarehouses() async {
     return await HiveWarehouses.getWarehouses();
+  }
+
+  ////////// Account Journal ////
+  static Future<void> setAccountJournal(RxList<AccountJournalModel> journals) async {
+    await initPreferences();
+    accountJournal.assignAll(journals);
+    await preferences!.setString(
+      PrefKeys.accountJournal,
+      jsonEncode(journals.toList()),
+    );
+  }
+
+  static Future<RxList<AccountJournalModel>> getAccountJournal() async {
+    await initPreferences();
+    var journalsString = preferences!.getString(PrefKeys.accountJournal);
+    if (journalsString == null || journalsString.isEmpty) {
+      return <AccountJournalModel>[].obs;
+    }
+    List<dynamic> decoded = jsonDecode(journalsString);
+    accountJournal.value = RxList(decoded.map((e) => AccountJournalModel.fromJson(e)).toList());
+    return accountJournal;
+  }
+
+  static Future<void> saveAccountJournal(RxList<AccountJournalModel> journals) async {
+    await setAccountJournal(journals);
   }
 }

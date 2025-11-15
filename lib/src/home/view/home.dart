@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:gsloution_mobile/common/config/app_colors.dart';
 import 'package:gsloution_mobile/common/utils/utils.dart';
 import 'package:gsloution_mobile/common/widgets/main_container.dart';
-import 'package:gsloution_mobile/src/home/controller/home_controller.dart';
+import 'package:gsloution_mobile/common/controllers/home_controller.dart';
 
 class Home extends StatefulWidget {
   @override

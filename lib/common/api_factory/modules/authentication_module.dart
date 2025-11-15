@@ -8,8 +8,8 @@ import 'package:gsloution_mobile/common/config/config.dart';
 import 'package:gsloution_mobile/common/config/prefs/pref_utils.dart';
 import 'package:gsloution_mobile/common/utils/utils.dart';
 import 'package:gsloution_mobile/common/widgets/log.dart';
-import 'package:gsloution_mobile/src/authentication/controllers/signin_controller.dart';
-import 'package:gsloution_mobile/src/authentication/models/user_model.dart';
+import 'package:gsloution_mobile/common/controllers/signin_controller.dart';
+import 'package:gsloution_mobile/common/api_factory/models/user/user_model.dart';
 import 'package:gsloution_mobile/src/routes/app_routes.dart';
 
 getVersionInfoAPI() {

@@ -8,7 +8,6 @@ import 'package:gsloution_mobile/common/config/app_colors.dart';
 import 'package:gsloution_mobile/common/config/prefs/pref_utils.dart';
 import 'package:gsloution_mobile/common/utils/utils.dart';
 import 'package:gsloution_mobile/common/widgets/build_image.dart';
-import 'package:gsloution_mobile/src/data/models/products_model/product_brand_model.dart';
 import 'package:gsloution_mobile/src/presentation/screens/pos_sales/pos_sales_sections/pos_bills_section.dart';
 import 'package:gsloution_mobile/src/presentation/widgets/app_bar/custom_app_bar.dart';
 import 'package:gsloution_mobile/src/utils/contstants.dart';
@@ -391,9 +390,9 @@ class _POSSalesMainScreenState extends State<POSSalesMainScreen> {
                     crossAxisSpacing: 15,
                     childAspectRatio: 1.1,
                   ),
-                  itemCount: productBrandModel.length,
+                  itemCount: 0, // TODO: استبدال بقائمة من Odoo عندما يكون نموذج العلامات التجارية متاحاً
                   itemBuilder: (context, index) {
-                    final brand = productBrandModel[index];
+                    final brand = <String, dynamic>{}; // Placeholder
                     return InkWell(
                       onTap: () {
                         setState(() {

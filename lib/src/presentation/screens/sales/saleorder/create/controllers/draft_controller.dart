@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:gsloution_mobile/src/data/services/draft_sale_service.dart';
+import 'package:gsloution_mobile/common/services/draft/draft_sale_service.dart';
 import 'package:gsloution_mobile/src/presentation/screens/sales/saleorder/create/controllers/order_controller.dart';
 import 'package:gsloution_mobile/src/routes/app_routes.dart';
 

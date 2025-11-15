@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gsloution_mobile/src/data/models/reports_model/warehouse_report_model.dart';
 import 'package:gsloution_mobile/src/presentation/widgets/toast/delete_toast.dart';
 
 class HorizontalWarehouseReportTableSection extends StatefulWidget {
@@ -22,6 +21,9 @@ class _HorizontalWarehouseReportTableSectionState
 
   @override
   Widget build(BuildContext context) {
+    // TODO: استبدال هذا بقائمة من Odoo عندما يكون نموذج تقارير المستودعات متاحاً
+    final List<Map<String, dynamic>> warehouseReportModel = [];
+
     if (warehouseReportModel.isEmpty) {
       return const Center(
         child: Text(

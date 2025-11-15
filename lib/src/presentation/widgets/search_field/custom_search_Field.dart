@@ -4,12 +4,18 @@ import 'package:gsloution_mobile/src/utils/contstants.dart';
 
 class CustomSearchField extends StatelessWidget {
   final String hintText;
+  final ValueChanged<String>? onChanged;
 
-  const CustomSearchField({super.key, required this.hintText});
+  const CustomSearchField({
+    super.key,
+    required this.hintText,
+    this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
     return TextField(
+      onChanged: onChanged,
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle:

@@ -16,7 +16,7 @@ import 'package:gsloution_mobile/src/presentation/screens/purchase/purchase_sect
 import 'package:gsloution_mobile/src/presentation/screens/sales/salesSections/sale_generate_invoice-section.dart';
 import 'package:gsloution_mobile/src/presentation/screens/sales/salesSections/sale_view_payment_card_section.dart';
 import 'package:gsloution_mobile/src/presentation/widgets/toast/delete_toast.dart';
-import 'package:gsloution_mobile/src/data/services/draft_sale_service.dart';
+import 'package:gsloution_mobile/common/services/draft/draft_sale_service.dart';
 
 import '../saleorder/create/controllers/controllers.dart';
 

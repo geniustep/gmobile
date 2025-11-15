@@ -41,12 +41,13 @@ class AuditLogService {
 
       final logEntry = {
         'id': DateTime.now().millisecondsSinceEpoch.toString(),
-        'userId': PrefUtils.getUserId() ?? 'unknown',
-        'userName': PrefUtils.getUserName() ?? 'Unknown User',
+        'userId': PrefUtils.user.value.uid ?? 'unknown',
+        'userName': PrefUtils.user.value.name ?? 'Unknown User',
         'action': action.name,
         'entityType': entityType,
         'entityId': entityId,
-        'description': description ?? _getActionDescription(action, entityType, entityId),
+        'description':
+            description ?? _getActionDescription(action, entityType, entityId),
         'metadata': metadata,
         'timestamp': DateTime.now().toIso8601String(),
         'deviceInfo': await _getDeviceInfo(),
@@ -55,7 +56,9 @@ class AuditLogService {
       await _logBox?.add(logEntry);
 
       if (kDebugMode) {
-        print('$_tag Logged: ${action.name} on $entityType${entityId != null ? " #$entityId" : ""}');
+        print(
+          '$_tag Logged: ${action.name} on $entityType${entityId != null ? " #$entityId" : ""}',
+        );
       }
     } catch (e) {
       if (kDebugMode) {
@@ -69,11 +72,13 @@ class AuditLogService {
     try {
       if (_logBox == null) await initialize();
 
-      final logs = _logBox?.values
-          .cast<Map<String, dynamic>>()
-          .toList()
-          .reversed
-          .toList() ?? [];
+      final logs =
+          _logBox?.values
+              .cast<Map<String, dynamic>>()
+              .toList()
+              .reversed
+              .toList() ??
+          [];
 
       return logs;
     } catch (e) {
@@ -92,16 +97,19 @@ class AuditLogService {
     try {
       if (_logBox == null) await initialize();
 
-      final logs = _logBox?.values
-          .cast<Map<String, dynamic>>()
-          .where((log) {
-            final matchesType = log['entityType'] == entityType;
-            final matchesId = entityId == null || log['entityId'] == entityId;
-            return matchesType && matchesId;
-          })
-          .toList()
-          .reversed
-          .toList() ?? [];
+      final logs =
+          _logBox?.values
+              .cast<Map<String, dynamic>>()
+              .where((log) {
+                final matchesType = log['entityType'] == entityType;
+                final matchesId =
+                    entityId == null || log['entityId'] == entityId;
+                return matchesType && matchesId;
+              })
+              .toList()
+              .reversed
+              .toList() ??
+          [];
 
       return logs;
     } catch (e) {
@@ -113,16 +121,20 @@ class AuditLogService {
   }
 
   /// Get logs for specific user
-  static Future<List<Map<String, dynamic>>> getLogsForUser(String userId) async {
+  static Future<List<Map<String, dynamic>>> getLogsForUser(
+    String userId,
+  ) async {
     try {
       if (_logBox == null) await initialize();
 
-      final logs = _logBox?.values
-          .cast<Map<String, dynamic>>()
-          .where((log) => log['userId'] == userId)
-          .toList()
-          .reversed
-          .toList() ?? [];
+      final logs =
+          _logBox?.values
+              .cast<Map<String, dynamic>>()
+              .where((log) => log['userId'] == userId)
+              .toList()
+              .reversed
+              .toList() ??
+          [];
 
       return logs;
     } catch (e) {
@@ -134,16 +146,20 @@ class AuditLogService {
   }
 
   /// Get logs by action type
-  static Future<List<Map<String, dynamic>>> getLogsByAction(AuditAction action) async {
+  static Future<List<Map<String, dynamic>>> getLogsByAction(
+    AuditAction action,
+  ) async {
     try {
       if (_logBox == null) await initialize();
 
-      final logs = _logBox?.values
-          .cast<Map<String, dynamic>>()
-          .where((log) => log['action'] == action.name)
-          .toList()
-          .reversed
-          .toList() ?? [];
+      final logs =
+          _logBox?.values
+              .cast<Map<String, dynamic>>()
+              .where((log) => log['action'] == action.name)
+              .toList()
+              .reversed
+              .toList() ??
+          [];
 
       return logs;
     } catch (e) {
@@ -162,15 +178,18 @@ class AuditLogService {
     try {
       if (_logBox == null) await initialize();
 
-      final logs = _logBox?.values
-          .cast<Map<String, dynamic>>()
-          .where((log) {
-            final timestamp = DateTime.parse(log['timestamp']);
-            return timestamp.isAfter(startDate) && timestamp.isBefore(endDate);
-          })
-          .toList()
-          .reversed
-          .toList() ?? [];
+      final logs =
+          _logBox?.values
+              .cast<Map<String, dynamic>>()
+              .where((log) {
+                final timestamp = DateTime.parse(log['timestamp']);
+                return timestamp.isAfter(startDate) &&
+                    timestamp.isBefore(endDate);
+              })
+              .toList()
+              .reversed
+              .toList() ??
+          [];
 
       return logs;
     } catch (e) {
@@ -188,19 +207,27 @@ class AuditLogService {
 
       final lowercaseQuery = query.toLowerCase();
 
-      final logs = _logBox?.values
-          .cast<Map<String, dynamic>>()
-          .where((log) {
-            final description = (log['description'] ?? '').toString().toLowerCase();
-            final entityType = (log['entityType'] ?? '').toString().toLowerCase();
-            final userName = (log['userName'] ?? '').toString().toLowerCase();
-            return description.contains(lowercaseQuery) ||
-                   entityType.contains(lowercaseQuery) ||
-                   userName.contains(lowercaseQuery);
-          })
-          .toList()
-          .reversed
-          .toList() ?? [];
+      final logs =
+          _logBox?.values
+              .cast<Map<String, dynamic>>()
+              .where((log) {
+                final description = (log['description'] ?? '')
+                    .toString()
+                    .toLowerCase();
+                final entityType = (log['entityType'] ?? '')
+                    .toString()
+                    .toLowerCase();
+                final userName = (log['userName'] ?? '')
+                    .toString()
+                    .toLowerCase();
+                return description.contains(lowercaseQuery) ||
+                    entityType.contains(lowercaseQuery) ||
+                    userName.contains(lowercaseQuery);
+              })
+              .toList()
+              .reversed
+              .toList() ??
+          [];
 
       return logs;
     } catch (e) {
@@ -321,7 +348,11 @@ class AuditLogService {
   }
 
   /// Get action description
-  static String _getActionDescription(AuditAction action, String entityType, String? entityId) {
+  static String _getActionDescription(
+    AuditAction action,
+    String entityType,
+    String? entityId,
+  ) {
     final id = entityId != null ? ' #$entityId' : '';
     switch (action) {
       case AuditAction.create:

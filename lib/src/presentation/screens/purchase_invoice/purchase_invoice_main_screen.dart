@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:gsloution_mobile/src/data/models/invoice_model/purchase_invoice_model.dart';
 import 'package:gsloution_mobile/src/presentation/screens/purchase_invoice/purchase_sections/purchase_invoice_list_section.dart';
 import 'package:gsloution_mobile/src/presentation/widgets/search_field/custom_search_Field.dart';
 import 'package:gsloution_mobile/src/routes/app_routes.dart';
