@@ -158,9 +158,9 @@ class _ProductListSectionState extends State<ProductListSection> {
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(12),
                 ),
-                child: isChampsValid(product.image_512)
+                child: isChampsValid(product.image_1920)
                     ? _buildProductImage(
-                        imageData: product.image_512,
+                        imageData: product.image_1920,
                         width: double.infinity,
                         height: double.infinity,
                       )
