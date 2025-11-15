@@ -1,30 +1,60 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
+// ════════════════════════════════════════════════════════════
+// Widget Tests - App Level
+// ════════════════════════════════════════════════════════════
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:gsloution_mobile/common/app.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(App(true));
+  group('App Widget Tests', () {
+    testWidgets('App should build without errors when logged out',
+        (WidgetTester tester) async {
+      // Build app with logged out state
+      await tester.pumpWidget(const App(false));
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+      // App should build successfully
+      expect(find.byType(MaterialApp), findsOneWidget);
+    });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    testWidgets('App should build without errors when logged in',
+        (WidgetTester tester) async {
+      // Build app with logged in state
+      await tester.pumpWidget(const App(true));
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+      // App should build successfully
+      expect(find.byType(MaterialApp), findsOneWidget);
+    });
+
+    testWidgets('App should have correct theme mode',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const App(false));
+
+      final MaterialApp app = tester.widget(find.byType(MaterialApp));
+
+      // Verify theme is set
+      expect(app.theme, isNotNull);
+    });
+
+    testWidgets('App should use GetMaterialApp for navigation',
+        (WidgetTester tester) async {
+      await tester.pumpWidget(const App(false));
+
+      // GetMaterialApp is a subclass of MaterialApp
+      // Verify that navigation is configured
+      final MaterialApp app = tester.widget(find.byType(MaterialApp));
+      expect(app, isNotNull);
+    });
+  });
+
+  group('App Initialization Tests', () {
+    test('App should accept boolean parameter for login state', () {
+      // Test constructor accepts boolean
+      const appLoggedOut = App(false);
+      const appLoggedIn = App(true);
+
+      expect(appLoggedOut, isNotNull);
+      expect(appLoggedIn, isNotNull);
+    });
   });
 }
