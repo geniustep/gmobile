@@ -13,6 +13,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:gsloution_mobile/common/storage/hive/hive_service.dart';
 import 'package:gsloution_mobile/common/services/network/network_info.dart';
+import 'package:gsloution_mobile/common/api_factory/bridgecore/factory/api_client_factory.dart';
 
 // ════════════════════════════════════════════════════════════
 // Pending Request Model
@@ -300,20 +301,114 @@ class OfflineQueueManager {
 
   /// تنفيذ طلب واحد
   Future<void> _executeRequest(PendingRequest request) async {
-    // TODO: تطبيق تنفيذ الطلب بناءً على operation
-    // يمكن استخدام ApiClientFactory هنا
+    final client = ApiClientFactory.instance;
 
-    // مثال:
-    // final client = ApiClientFactory.instance;
-    // await client.create(
-    //   model: request.model,
-    //   values: request.data,
-    //   onResponse: (response) {},
-    //   onError: (error, data) => throw Exception(error),
-    // );
+    // استخدام Completer لجعل العملية async
+    final completer = Completer<void>();
 
-    // للآن نرمي exception للاختبار
-    throw UnimplementedError('Request execution not implemented yet');
+    // استخراج البيانات من request
+    final model = request.model;
+    final data = request.data;
+    final operation = request.operation.toLowerCase();
+
+    try {
+      switch (operation) {
+        case 'create':
+          await client.create(
+            model: model,
+            values: data['values'] ?? data,
+            context: data['context'],
+            onResponse: (response) {
+              if (kDebugMode) {
+                print('✅ Offline request executed: create $model');
+              }
+              completer.complete();
+            },
+            onError: (error, errorData) {
+              if (kDebugMode) {
+                print('❌ Offline request failed: $error');
+              }
+              completer.completeError(Exception(error));
+            },
+          );
+          break;
+
+        case 'write':
+        case 'update':
+          await client.write(
+            model: model,
+            ids: List<int>.from(data['ids'] ?? []),
+            values: data['values'] ?? {},
+            context: data['context'],
+            onResponse: (response) {
+              if (kDebugMode) {
+                print('✅ Offline request executed: write $model');
+              }
+              completer.complete();
+            },
+            onError: (error, errorData) {
+              if (kDebugMode) {
+                print('❌ Offline request failed: $error');
+              }
+              completer.completeError(Exception(error));
+            },
+          );
+          break;
+
+        case 'unlink':
+        case 'delete':
+          await client.unlink(
+            model: model,
+            ids: List<int>.from(data['ids'] ?? []),
+            context: data['context'],
+            onResponse: (response) {
+              if (kDebugMode) {
+                print('✅ Offline request executed: unlink $model');
+              }
+              completer.complete();
+            },
+            onError: (error, errorData) {
+              if (kDebugMode) {
+                print('❌ Offline request failed: $error');
+              }
+              completer.completeError(Exception(error));
+            },
+          );
+          break;
+
+        case 'call_kw':
+          await client.callKW(
+            model: model,
+            method: data['method'] ?? '',
+            args: data['args'] ?? [],
+            kwargs: data['kwargs'],
+            onResponse: (response) {
+              if (kDebugMode) {
+                print('✅ Offline request executed: call_kw $model');
+              }
+              completer.complete();
+            },
+            onError: (error, errorData) {
+              if (kDebugMode) {
+                print('❌ Offline request failed: $error');
+              }
+              completer.completeError(Exception(error));
+            },
+          );
+          break;
+
+        default:
+          throw Exception('Unsupported operation: $operation');
+      }
+
+      // انتظار اكتمال العملية
+      await completer.future;
+    } catch (e) {
+      if (kDebugMode) {
+        print('❌ Error executing offline request: $e');
+      }
+      rethrow;
+    }
   }
 
   // ════════════════════════════════════════════════════════════

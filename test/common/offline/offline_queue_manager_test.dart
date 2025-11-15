@@ -4,6 +4,12 @@
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gsloution_mobile/common/offline/offline_queue_manager.dart';
+import 'package:gsloution_mobile/common/api_factory/bridgecore/base/base_api_client.dart';
+import 'package:gsloution_mobile/common/api_factory/bridgecore/factory/api_client_factory.dart';
+import 'package:mocktail/mocktail.dart';
+
+// Mock classes
+class MockBaseApiClient extends Mock implements BaseApiClient {}
 
 void main() {
   group('OfflineQueueManager Tests', () {
@@ -180,6 +186,121 @@ void main() {
       queueManager.stopAutoSync();
 
       expect(queueManager.isAutoSyncEnabled, isFalse);
+    });
+
+    test('should get statistics about queue', () async {
+      await queueManager.addToQueue(
+        PendingRequest(
+          id: '1',
+          operation: 'create',
+          model: 'test.model',
+          data: {},
+          priority: RequestPriority.high,
+        ),
+      );
+
+      await queueManager.addToQueue(
+        PendingRequest(
+          id: '2',
+          operation: 'write',
+          model: 'test.model',
+          data: {},
+          priority: RequestPriority.low,
+        ),
+      );
+
+      final stats = queueManager.getStatistics();
+
+      expect(stats['total'], equals(2));
+      expect(stats['isSyncing'], isFalse);
+      expect(stats['byPriority']['high'], equals(1));
+      expect(stats['byPriority']['low'], equals(1));
+      expect(stats['byOperation']['create'], equals(1));
+      expect(stats['byOperation']['write'], equals(1));
+    });
+
+    test('should get requests by priority', () async {
+      await queueManager.addToQueue(
+        PendingRequest(
+          id: '1',
+          operation: 'create',
+          model: 'test.model',
+          data: {},
+          priority: RequestPriority.high,
+        ),
+      );
+
+      await queueManager.addToQueue(
+        PendingRequest(
+          id: '2',
+          operation: 'write',
+          model: 'test.model',
+          data: {},
+          priority: RequestPriority.high,
+        ),
+      );
+
+      await queueManager.addToQueue(
+        PendingRequest(
+          id: '3',
+          operation: 'unlink',
+          model: 'test.model',
+          data: {},
+          priority: RequestPriority.low,
+        ),
+      );
+
+      final highPriorityRequests =
+          queueManager.getRequestsByPriority(RequestPriority.high);
+
+      expect(highPriorityRequests.length, equals(2));
+      expect(highPriorityRequests.every((r) => r.priority == RequestPriority.high), isTrue);
+    });
+
+    test('should handle copyWith for retry count', () {
+      final request = PendingRequest(
+        id: '1',
+        operation: 'create',
+        model: 'test.model',
+        data: {},
+        retryCount: 0,
+      );
+
+      final updatedRequest = request.copyWith(retryCount: 1);
+
+      expect(updatedRequest.retryCount, equals(1));
+      expect(updatedRequest.id, equals(request.id));
+      expect(updatedRequest.operation, equals(request.operation));
+      expect(updatedRequest.model, equals(request.model));
+    });
+
+    test('should handle remove from queue by id', () async {
+      await queueManager.addToQueue(
+        PendingRequest(
+          id: 'request_1',
+          operation: 'create',
+          model: 'test.model',
+          data: {},
+        ),
+      );
+
+      await queueManager.addToQueue(
+        PendingRequest(
+          id: 'request_2',
+          operation: 'write',
+          model: 'test.model',
+          data: {},
+        ),
+      );
+
+      expect(queueManager.pendingCount, equals(2));
+
+      await queueManager.removeFromQueue('request_1');
+
+      expect(queueManager.pendingCount, equals(1));
+
+      final remaining = queueManager.getAllRequests();
+      expect(remaining.first.id, equals('request_2'));
     });
   });
 
