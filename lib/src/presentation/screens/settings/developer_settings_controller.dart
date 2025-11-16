@@ -3,6 +3,7 @@
 // ════════════════════════════════════════════════════════════
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:gsloution_mobile/common/api_factory/bridgecore/config/api_mode_config.dart';
 import 'package:gsloution_mobile/common/api_factory/bridgecore/resilience/circuit_breaker.dart';

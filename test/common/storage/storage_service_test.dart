@@ -27,13 +27,13 @@ void main() {
   group('StorageService Token Operations', () {
     setUp(() async {
       // تنظيف قبل كل اختبار
-      await StorageService.instance.clearToken();
+      await StorageService.instance.setToken('');
     });
 
     test('should save and retrieve token', () async {
       const testToken = 'test_token_123';
 
-      await StorageService.instance.saveToken(testToken);
+      await StorageService.instance.setToken(testToken);
       final retrievedToken = await StorageService.instance.getToken();
 
       expect(retrievedToken, equals(testToken));
@@ -46,8 +46,8 @@ void main() {
     });
 
     test('should update token value', () async {
-      await StorageService.instance.saveToken('token1');
-      await StorageService.instance.saveToken('token2');
+      await StorageService.instance.setToken('token1');
+      await StorageService.instance.setToken('token2');
 
       final token = await StorageService.instance.getToken();
 
@@ -55,8 +55,8 @@ void main() {
     });
 
     test('should clear token', () async {
-      await StorageService.instance.saveToken('test_token');
-      await StorageService.instance.clearToken();
+      await StorageService.instance.setToken('test_token');
+      await StorageService.instance.setToken('');
 
       final token = await StorageService.instance.getToken();
 
@@ -93,23 +93,23 @@ void main() {
 
   group('StorageService User Operations', () {
     setUp(() async {
-      await StorageService.instance.clearUser();
+      await StorageService.instance.setUser(UserModel());
     });
 
     test('should save and retrieve user', () async {
       final testUser = UserModel(
         uid: 123,
         name: 'Test User',
-        login: 'test@example.com',
+        username: 'test@example.com',
       );
 
-      await StorageService.instance.saveUser(testUser);
+      await StorageService.instance.setUser(testUser);
       final retrievedUser = await StorageService.instance.getUser();
 
       expect(retrievedUser, isNotNull);
       expect(retrievedUser?.uid, equals(123));
       expect(retrievedUser?.name, equals('Test User'));
-      expect(retrievedUser?.login, equals('test@example.com'));
+      expect(retrievedUser?.username, equals('test@example.com'));
     });
 
     test('should return null when user not set', () async {
@@ -120,8 +120,8 @@ void main() {
 
     test('should clear user', () async {
       final testUser = UserModel(uid: 1, name: 'Test');
-      await StorageService.instance.saveUser(testUser);
-      await StorageService.instance.clearUser();
+      await StorageService.instance.setUser(testUser);
+      await StorageService.instance.setUser(UserModel());
 
       final user = await StorageService.instance.getUser();
 
@@ -134,14 +134,14 @@ void main() {
       ProductModel(
         id: 1,
         name: 'Product 1',
-        price: 100.0,
-        imageUrl: 'url1',
+        list_price: 100.0,
+        image_128: 'url1',
       ),
       ProductModel(
         id: 2,
         name: 'Product 2',
-        price: 200.0,
-        imageUrl: 'url2',
+        list_price: 200.0,
+        image_128: 'url2',
       ),
     ];
 
@@ -200,8 +200,8 @@ void main() {
         (i) => ProductModel(
           id: i,
           name: 'Product $i',
-          price: i * 10.0,
-          imageUrl: 'url$i',
+          list_price: i * 10.0,
+          image_128: 'url$i',
         ),
       );
 
@@ -216,8 +216,8 @@ void main() {
     test('should save and retrieve latitude', () async {
       const testLat = 25.276987;
 
-      await StorageService.instance.setLat(testLat);
-      final lat = await StorageService.instance.getLat();
+      await StorageService.instance.setLatitude(testLat);
+      final lat = StorageService.instance.getLatitude();
 
       expect(lat, equals(testLat));
     });
@@ -225,8 +225,8 @@ void main() {
     test('should save and retrieve longitude', () async {
       const testLong = 55.296249;
 
-      await StorageService.instance.setLong(testLong);
-      final long = await StorageService.instance.getLong();
+      await StorageService.instance.setLongitude(testLong);
+      final long = StorageService.instance.getLongitude();
 
       expect(long, equals(testLong));
     });
@@ -235,11 +235,11 @@ void main() {
       const lat = 25.276987;
       const long = 55.296249;
 
-      await StorageService.instance.setLat(lat);
-      await StorageService.instance.setLong(long);
+      await StorageService.instance.setLatitude(lat);
+      await StorageService.instance.setLongitude(long);
 
-      final retrievedLat = await StorageService.instance.getLat();
-      final retrievedLong = await StorageService.instance.getLong();
+      final retrievedLat = StorageService.instance.getLatitude();
+      final retrievedLong = StorageService.instance.getLongitude();
 
       expect(retrievedLat, equals(lat));
       expect(retrievedLong, equals(long));
@@ -250,13 +250,13 @@ void main() {
     test('should handle null values gracefully', () async {
       // Saving null should not throw
       expect(
-        () => StorageService.instance.saveUser(UserModel()),
+        () => StorageService.instance.setUser(UserModel()),
         returnsNormally,
       );
     });
 
     test('should handle empty strings', () async {
-      await StorageService.instance.saveToken('');
+      await StorageService.instance.setToken('');
       final token = await StorageService.instance.getToken();
 
       expect(token, equals(''));
@@ -265,7 +265,7 @@ void main() {
     test('should handle concurrent operations', () async {
       final futures = List.generate(
         10,
-        (i) => StorageService.instance.saveToken('token$i'),
+        (i) => StorageService.instance.setToken('token$i'),
       );
 
       await Future.wait(futures);
@@ -282,8 +282,8 @@ void main() {
       final user = UserModel(uid: 999, name: 'Persistent User');
 
       // Save multiple pieces of data
-      await StorageService.instance.saveToken(token);
-      await StorageService.instance.saveUser(user);
+      await StorageService.instance.setToken(token);
+      await StorageService.instance.setUser(user);
       await StorageService.instance.setIsLoggedIn(true);
 
       // Verify all data is still there

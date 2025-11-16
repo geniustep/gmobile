@@ -4,10 +4,11 @@
 
 import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:gsloution_mobile/common/storage/storage_service.dart';
-import 'package:gsloution_mobile/common/api_factory/factory/api_client_factory.dart';
+import 'package:gsloution_mobile/common/api_factory/bridgecore/factory/api_client_factory.dart';
 import 'package:gsloution_mobile/common/api_factory/bridgecore/websocket/websocket_manager.dart';
 import 'package:gsloution_mobile/common/api_factory/models/user/user_model.dart';
 import 'package:gsloution_mobile/src/routes/app_routes.dart';
@@ -54,7 +55,8 @@ class SmartSplashController extends GetxController {
 
   Future<void> _initialize() async {
     try {
-      if (kDebugMode) print('🚀 SmartSplashController: Starting initialization...');
+      if (kDebugMode)
+        print('🚀 SmartSplashController: Starting initialization...');
 
       // Step 1: Initialize storage
       await _initializeStorage();
@@ -64,7 +66,6 @@ class SmartSplashController extends GetxController {
 
       // Step 3: Check for existing token
       await _checkExistingToken();
-
     } catch (e, stackTrace) {
       if (kDebugMode) {
         print('❌ SmartSplashController: Initialization error: $e');
@@ -88,7 +89,6 @@ class SmartSplashController extends GetxController {
 
       progress.value = 0.2;
       if (kDebugMode) print('✅ Storage initialized');
-
     } catch (e) {
       if (kDebugMode) print('❌ Storage initialization failed: $e');
       rethrow;
@@ -112,7 +112,6 @@ class SmartSplashController extends GetxController {
       }
 
       progress.value = 0.4;
-
     } catch (e) {
       if (kDebugMode) print('⚠️ Connectivity check failed: $e');
       hasInternet.value = false;
@@ -145,7 +144,6 @@ class SmartSplashController extends GetxController {
         if (kDebugMode) print('➡️ No valid session, redirecting to login');
         _navigateToLogin();
       }
-
     } catch (e) {
       if (kDebugMode) print('❌ Token check failed: $e');
       _navigateToLogin();
@@ -181,7 +179,6 @@ class SmartSplashController extends GetxController {
         await _storage.setIsLoggedIn(false);
         _navigateToLogin();
       }
-
     } catch (e) {
       if (kDebugMode) print('❌ Auto-login failed: $e');
 
@@ -196,18 +193,25 @@ class SmartSplashController extends GetxController {
 
   Future<bool> _validateToken(String token) async {
     try {
-      final client = ApiClientFactory.instance.getClient();
+      final client = ApiClientFactory.instance;
+      final completer = Completer<bool>();
 
       // Try to fetch user info as token validation
-      final response = await client.read(
+      await client.read(
         model: 'res.users',
         ids: [],
         fields: ['id', 'name', 'email'],
+        onResponse: (_) {
+          if (kDebugMode) print('✅ Token validation successful');
+          completer.complete(true);
+        },
+        onError: (error, data) {
+          if (kDebugMode) print('❌ Token validation failed: $error');
+          completer.complete(false);
+        },
       );
 
-      if (kDebugMode) print('✅ Token validation successful');
-      return true;
-
+      return await completer.future;
     } catch (e) {
       if (kDebugMode) print('❌ Token validation failed: $e');
       return false;
@@ -237,7 +241,6 @@ class SmartSplashController extends GetxController {
       // Navigate to dashboard
       await Future.delayed(const Duration(milliseconds: 500));
       _navigateToDashboard();
-
     } catch (e) {
       if (kDebugMode) print('❌ Data loading failed: $e');
 
@@ -258,7 +261,6 @@ class SmartSplashController extends GetxController {
       await WebSocketManager.instance.connect(token);
 
       if (kDebugMode) print('✅ WebSocket connected');
-
     } catch (e) {
       if (kDebugMode) print('⚠️ WebSocket initialization failed: $e');
       // Continue without WebSocket
@@ -273,7 +275,7 @@ class SmartSplashController extends GetxController {
     try {
       if (kDebugMode) print('📦 Loading data in parallel...');
 
-      final client = ApiClientFactory.instance.getClient();
+      final client = ApiClientFactory.instance;
 
       // Load essential data in parallel
       await Future.wait([
@@ -292,7 +294,6 @@ class SmartSplashController extends GetxController {
       ]).catchError((e) {
         if (kDebugMode) print('⚠️ Secondary data loading failed: $e');
       });
-
     } catch (e) {
       if (kDebugMode) print('❌ Parallel data loading failed: $e');
       rethrow;
@@ -303,12 +304,25 @@ class SmartSplashController extends GetxController {
     try {
       statusMessage.value = 'جاري تحميل المنتجات...';
 
-      final products = await client.searchRead(
+      final completer = Completer<List<dynamic>>();
+
+      await client.searchRead(
         model: 'product.product',
-        domain: [['sale_ok', '=', true]],
+        domain: [
+          ['sale_ok', '=', true],
+        ],
         fields: ['id', 'name', 'default_code', 'list_price', 'standard_price'],
         limit: 1000,
+        onResponse: (response) {
+          final products = (response as List).toList();
+          completer.complete(products);
+        },
+        onError: (error, data) {
+          completer.completeError(error);
+        },
       );
+
+      final products = await completer.future;
 
       // Save to cache
       // await _storage.setProducts(products);
@@ -323,12 +337,25 @@ class SmartSplashController extends GetxController {
     try {
       statusMessage.value = 'جاري تحميل العملاء...';
 
-      final partners = await client.searchRead(
+      final completer = Completer<List<dynamic>>();
+
+      await client.searchRead(
         model: 'res.partner',
-        domain: [['customer_rank', '>', 0]],
+        domain: [
+          ['customer_rank', '>', 0],
+        ],
         fields: ['id', 'name', 'email', 'phone', 'mobile'],
         limit: 1000,
+        onResponse: (response) {
+          final partners = (response as List).toList();
+          completer.complete(partners);
+        },
+        onError: (error, data) {
+          completer.completeError(error);
+        },
       );
+
+      final partners = await completer.future;
 
       // Save to cache
       // await _storage.setPartners(partners);
@@ -343,12 +370,23 @@ class SmartSplashController extends GetxController {
     try {
       statusMessage.value = 'جاري تحميل المبيعات...';
 
-      final sales = await client.searchRead(
+      final completer = Completer<List<dynamic>>();
+
+      await client.searchRead(
         model: 'sale.order',
         domain: [],
         fields: ['id', 'name', 'partner_id', 'amount_total', 'state'],
         limit: 100,
+        onResponse: (response) {
+          final sales = (response as List).toList();
+          completer.complete(sales);
+        },
+        onError: (error, data) {
+          completer.completeError(error);
+        },
       );
+
+      final sales = await completer.future;
 
       // Save to cache
       // await _storage.setSales(sales);
@@ -361,11 +399,22 @@ class SmartSplashController extends GetxController {
 
   Future<void> _loadCategories(dynamic client) async {
     try {
-      final categories = await client.searchRead(
+      final completer = Completer<List<dynamic>>();
+
+      await client.searchRead(
         model: 'product.category',
         domain: [],
         fields: ['id', 'name', 'parent_id'],
+        onResponse: (response) {
+          final categories = (response as List).toList();
+          completer.complete(categories);
+        },
+        onError: (error, data) {
+          completer.completeError(error);
+        },
       );
+
+      final categories = await completer.future;
 
       if (kDebugMode) print('✅ Loaded ${categories.length} categories');
     } catch (e) {
@@ -375,12 +424,25 @@ class SmartSplashController extends GetxController {
 
   Future<void> _loadAccountMoves(dynamic client) async {
     try {
-      final moves = await client.searchRead(
+      final completer = Completer<List<dynamic>>();
+
+      await client.searchRead(
         model: 'account.move',
-        domain: [['move_type', '=', 'out_invoice']],
+        domain: [
+          ['move_type', '=', 'out_invoice'],
+        ],
         fields: ['id', 'name', 'partner_id', 'amount_total', 'state'],
         limit: 100,
+        onResponse: (response) {
+          final moves = (response as List).toList();
+          completer.complete(moves);
+        },
+        onError: (error, data) {
+          completer.completeError(error);
+        },
       );
+
+      final moves = await completer.future;
 
       if (kDebugMode) print('✅ Loaded ${moves.length} account moves');
     } catch (e) {
@@ -390,12 +452,23 @@ class SmartSplashController extends GetxController {
 
   Future<void> _loadStockPicking(dynamic client) async {
     try {
-      final pickings = await client.searchRead(
+      final completer = Completer<List<dynamic>>();
+
+      await client.searchRead(
         model: 'stock.picking',
         domain: [],
         fields: ['id', 'name', 'partner_id', 'state'],
         limit: 100,
+        onResponse: (response) {
+          final pickings = (response as List).toList();
+          completer.complete(pickings);
+        },
+        onError: (error, data) {
+          completer.completeError(error);
+        },
       );
+
+      final pickings = await completer.future;
 
       if (kDebugMode) print('✅ Loaded ${pickings.length} stock pickings');
     } catch (e) {
@@ -439,7 +512,6 @@ class SmartSplashController extends GetxController {
 
       await Future.delayed(const Duration(milliseconds: 500));
       _navigateToDashboard();
-
     } catch (e) {
       if (kDebugMode) print('❌ Cache loading failed: $e');
       _handleError('فشل تحميل البيانات المحفوظة');

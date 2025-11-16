@@ -17,7 +17,7 @@ void main() {
     test('Storage and Cache should work together', () async {
       // Use StorageService to save data
       const token = 'integration_test_token';
-      await StorageService.instance.saveToken(token);
+      await StorageService.instance.setToken(token);
 
       // Use CacheManager to cache data
       await CacheManager.instance.set(
@@ -34,7 +34,7 @@ void main() {
       expect(cachedData['token'], equals(token));
 
       // Cleanup
-      await StorageService.instance.clearToken();
+      await StorageService.instance.setToken('');
       await CacheManager.instance.invalidateAll();
     });
 
@@ -43,7 +43,7 @@ void main() {
 
       // Simular iniciar sesión
       await StorageService.instance.setIsLoggedIn(true);
-      await StorageService.instance.saveToken('session_token');
+      await StorageService.instance.setToken('session_token');
 
       // Verificar que la sesión está activa
       sessionManager.startMonitoring();
@@ -52,7 +52,7 @@ void main() {
       // Limpiar
       sessionManager.stopMonitoring();
       await StorageService.instance.setIsLoggedIn(false);
-      await StorageService.instance.clearToken();
+      await StorageService.instance.setToken('');
     });
 
     test('Offline Queue and Storage should persist requests', () async {
@@ -97,7 +97,7 @@ void main() {
     test('Complete data flow: Storage -> Cache -> Retrieval', () async {
       // Step 1: Save to storage
       const testData = 'flow_test_data';
-      await StorageService.instance.saveToken(testData);
+      await StorageService.instance.setToken(testData);
 
       // Step 2: Cache it
       final token = await StorageService.instance.getToken();
@@ -117,14 +117,14 @@ void main() {
       expect(token, equals(testData));
 
       // Cleanup
-      await StorageService.instance.clearToken();
+      await StorageService.instance.setToken('');
       await CacheManager.instance.invalidateAll();
     });
 
     test('Multiple systems should not conflict', () async {
       // Initialize multiple systems simultaneously
       final futures = [
-        StorageService.instance.saveToken('token_1'),
+        StorageService.instance.setToken('token_1'),
         CacheManager.instance.set(key: 'key_1', data: 'data_1'),
         OfflineQueueManager.instance.addToQueue(
           PendingRequest(
@@ -147,7 +147,7 @@ void main() {
       expect(OfflineQueueManager.instance.pendingCount, greaterThan(0));
 
       // Cleanup
-      await StorageService.instance.clearToken();
+      await StorageService.instance.setToken('');
       await CacheManager.instance.invalidateAll();
       await OfflineQueueManager.instance.clearQueue();
     });
@@ -156,19 +156,19 @@ void main() {
   group('Error Recovery Integration Tests', () {
     test('System should recover from storage errors', () async {
       // Save data
-      await StorageService.instance.saveToken('recovery_token');
+      await StorageService.instance.setToken('recovery_token');
 
       // Simulate error by clearing
-      await StorageService.instance.clearToken();
+      await StorageService.instance.setToken('');
 
       // Recover by saving again
-      await StorageService.instance.saveToken('new_token');
+      await StorageService.instance.setToken('new_token');
 
       final token = await StorageService.instance.getToken();
       expect(token, equals('new_token'));
 
       // Cleanup
-      await StorageService.instance.clearToken();
+      await StorageService.instance.setToken('');
     });
 
     test('Cache should handle expired data gracefully', () async {
@@ -187,10 +187,7 @@ void main() {
       expect(data, isNull);
 
       // Set again
-      await CacheManager.instance.set(
-        key: 'expiring_key',
-        data: 'new_data',
-      );
+      await CacheManager.instance.set(key: 'expiring_key', data: 'new_data');
 
       final newData = await CacheManager.instance.get<String>(
         key: 'expiring_key',
@@ -239,10 +236,7 @@ void main() {
 
       final stopwatch = Stopwatch()..start();
 
-      await CacheManager.instance.set(
-        key: 'large_data',
-        data: largeList,
-      );
+      await CacheManager.instance.set(key: 'large_data', data: largeList);
 
       final retrieved = await CacheManager.instance.get<List>(
         key: 'large_data',

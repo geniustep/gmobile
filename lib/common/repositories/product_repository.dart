@@ -2,9 +2,11 @@
 // ProductRepository - With Optimistic Updates
 // ════════════════════════════════════════════════════════════
 
+import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:get/get.dart';
 import 'package:gsloution_mobile/common/repositories/base/optimistic_repository.dart';
-import 'package:gsloution_mobile/common/api_factory/factory/api_client_factory.dart';
+import 'package:gsloution_mobile/common/api_factory/bridgecore/factory/api_client_factory.dart';
 import 'package:gsloution_mobile/common/storage/storage_service.dart';
 import 'package:gsloution_mobile/common/config/prefs/pref_utils.dart';
 import 'package:gsloution_mobile/common/api_factory/models/product/product_model.dart';
@@ -28,28 +30,49 @@ class ProductRepository extends OptimisticRepository<ProductModel> {
     try {
       // Try cache first
       if (!forceRefresh) {
-        final cached = await _storage.getProducts(
-          limit: limit,
-          offset: offset,
-        );
+        final cached = await _storage.getProducts(limit: limit, offset: offset);
 
         if (cached.isNotEmpty) {
           if (kDebugMode) {
-            print('✅ ProductRepository: Loaded ${cached.length} products from cache');
+            print(
+              '✅ ProductRepository: Loaded ${cached.length} products from cache',
+            );
           }
           return cached;
         }
       }
 
       // Fetch from server
-      final client = ApiClientFactory.instance.getClient();
-      final products = await client.searchRead(
+      final client = ApiClientFactory.instance;
+      final completer = Completer<List<Map<String, dynamic>>>();
+
+      await client.searchRead(
         model: 'product.product',
-        domain: [['sale_ok', '=', true]],
-        fields: ['id', 'name', 'default_code', 'list_price', 'standard_price', 'qty_available'],
+        domain: [
+          ['sale_ok', '=', true],
+        ],
+        fields: [
+          'id',
+          'name',
+          'default_code',
+          'list_price',
+          'standard_price',
+          'qty_available',
+        ],
         limit: limit ?? 1000,
         offset: offset,
+        onResponse: (response) {
+          final products = (response as List)
+              .map((p) => p as Map<String, dynamic>)
+              .toList();
+          completer.complete(products);
+        },
+        onError: (error, data) {
+          completer.completeError(error);
+        },
       );
+
+      final products = await completer.future;
 
       // Convert to ProductModel
       final productModels = products
@@ -59,15 +82,16 @@ class ProductRepository extends OptimisticRepository<ProductModel> {
       // Save to cache
       if (offset == null || offset == 0) {
         await _storage.setProducts(productModels);
-        await PrefUtils.setProducts(productModels.obs);
+        await PrefUtils.setProducts(RxList(productModels));
       }
 
       if (kDebugMode) {
-        print('✅ ProductRepository: Fetched ${productModels.length} products from server');
+        print(
+          '✅ ProductRepository: Fetched ${productModels.length} products from server',
+        );
       }
 
       return productModels;
-
     } catch (e) {
       if (kDebugMode) {
         print('❌ ProductRepository: Error getting products: $e');
@@ -92,9 +116,9 @@ class ProductRepository extends OptimisticRepository<ProductModel> {
     final optimisticProduct = ProductModel(
       id: tempId,
       name: product.name,
-      defaultCode: product.defaultCode,
-      listPrice: product.listPrice,
-      standardPrice: product.standardPrice,
+      default_code: product.default_code,
+      list_price: product.list_price,
+      standard_price: product.standard_price,
     );
 
     ProductModel? createdProduct;
@@ -104,7 +128,7 @@ class ProductRepository extends OptimisticRepository<ProductModel> {
         // Add product locally immediately
         allProducts.insert(0, optimisticProduct);
         _storage.setProducts(allProducts);
-        PrefUtils.setProducts(allProducts.obs);
+        PrefUtils.setProducts(RxList(allProducts));
 
         if (kDebugMode) {
           print('⚡ ProductRepository: Optimistically added product');
@@ -113,20 +137,30 @@ class ProductRepository extends OptimisticRepository<ProductModel> {
 
       serverUpdate: () async {
         // Send to server
-        final client = ApiClientFactory.instance.getClient();
-        final result = await client.create(
+        final client = ApiClientFactory.instance;
+        final completer = Completer<Map<String, dynamic>>();
+
+        await client.create(
           model: 'product.product',
           values: product.toJson(),
+          onResponse: (response) {
+            completer.complete(response as Map<String, dynamic>);
+          },
+          onError: (error, data) {
+            completer.completeError(error);
+          },
         );
+
+        final result = await completer.future;
 
         // Update with real ID
         final realId = result['id'] as int;
         createdProduct = ProductModel(
           id: realId,
           name: product.name,
-          defaultCode: product.defaultCode,
-          listPrice: product.listPrice,
-          standardPrice: product.standardPrice,
+          default_code: product.default_code,
+          list_price: product.list_price,
+          standard_price: product.standard_price,
         );
 
         // Replace temp product with real one
@@ -138,7 +172,9 @@ class ProductRepository extends OptimisticRepository<ProductModel> {
         }
 
         if (kDebugMode) {
-          print('✅ ProductRepository: Product created on server with ID: $realId');
+          print(
+            '✅ ProductRepository: Product created on server with ID: $realId',
+          );
         }
       },
 
@@ -192,14 +228,14 @@ class ProductRepository extends OptimisticRepository<ProductModel> {
         final updatedProduct = ProductModel(
           id: oldProduct.id,
           name: values['name'] ?? oldProduct.name,
-          defaultCode: values['default_code'] ?? oldProduct.defaultCode,
-          listPrice: values['list_price'] ?? oldProduct.listPrice,
-          standardPrice: values['standard_price'] ?? oldProduct.standardPrice,
+          default_code: values['default_code'] ?? oldProduct.default_code,
+          list_price: values['list_price'] ?? oldProduct.list_price,
+          standard_price: values['standard_price'] ?? oldProduct.standard_price,
         );
 
         allProducts[index] = updatedProduct;
         _storage.setProducts(allProducts);
-        PrefUtils.setProducts(allProducts.obs);
+        PrefUtils.setProducts(RxList(allProducts));
 
         if (kDebugMode) {
           print('⚡ ProductRepository: Optimistically updated product #$id');
@@ -208,12 +244,22 @@ class ProductRepository extends OptimisticRepository<ProductModel> {
 
       serverUpdate: () async {
         // Send to server
-        final client = ApiClientFactory.instance.getClient();
+        final client = ApiClientFactory.instance;
+        final completer = Completer<void>();
+
         await client.write(
           model: 'product.product',
           ids: [id],
           values: values,
+          onResponse: (_) {
+            completer.complete();
+          },
+          onError: (error, data) {
+            completer.completeError(error);
+          },
         );
+
+        await completer.future;
 
         if (kDebugMode) {
           print('✅ ProductRepository: Product #$id updated on server');
@@ -259,7 +305,7 @@ class ProductRepository extends OptimisticRepository<ProductModel> {
         // Remove product locally immediately
         allProducts.removeWhere((p) => p.id == id);
         _storage.setProducts(allProducts);
-        PrefUtils.setProducts(allProducts.obs);
+        PrefUtils.setProducts(RxList(allProducts));
 
         if (kDebugMode) {
           print('⚡ ProductRepository: Optimistically deleted product #$id');
@@ -268,11 +314,21 @@ class ProductRepository extends OptimisticRepository<ProductModel> {
 
       serverUpdate: () async {
         // Send to server
-        final client = ApiClientFactory.instance.getClient();
+        final client = ApiClientFactory.instance;
+        final completer = Completer<void>();
+
         await client.unlink(
           model: 'product.product',
           ids: [id],
+          onResponse: (_) {
+            completer.complete();
+          },
+          onError: (error, data) {
+            completer.completeError(error);
+          },
         );
+
+        await completer.future;
 
         if (kDebugMode) {
           print('✅ ProductRepository: Product #$id deleted on server');
@@ -319,18 +375,19 @@ class ProductRepository extends OptimisticRepository<ProductModel> {
       // Search in cache first
       final results = allProducts.where((product) {
         final name = product.name?.toLowerCase() ?? '';
-        final code = product.defaultCode?.toLowerCase() ?? '';
+        final code = product.default_code?.toLowerCase() ?? '';
         final searchQuery = query.toLowerCase();
 
         return name.contains(searchQuery) || code.contains(searchQuery);
       }).toList();
 
       if (kDebugMode) {
-        print('🔍 ProductRepository: Found ${results.length} products matching "$query"');
+        print(
+          '🔍 ProductRepository: Found ${results.length} products matching "$query"',
+        );
       }
 
       return results;
-
     } catch (e) {
       if (kDebugMode) {
         print('❌ ProductRepository: Error searching products: $e');
