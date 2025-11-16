@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:gsloution_mobile/common/api_factory/models/order/sale_order_model.dart';
 import 'package:gsloution_mobile/common/config/app_colors.dart';
 import 'package:gsloution_mobile/common/config/prefs/pref_utils.dart';
+import 'package:gsloution_mobile/common/config/hive/hive_sales.dart';
 import 'package:gsloution_mobile/src/presentation/screens/sales/saleorder/create/create_new_order_form.dart';
 import 'package:gsloution_mobile/src/presentation/screens/sales/salesSections/horizontal_sales_table_section.dart';
 import 'package:gsloution_mobile/src/presentation/widgets/draft_indicators/draft_app_bar_badge.dart';
@@ -23,20 +24,31 @@ class SalesMainScreen extends StatefulWidget {
 class _SalesMainScreenState extends State<SalesMainScreen> {
   final controller = SidebarXController(selectedIndex: 1, extended: true);
   final GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
-  final RxList<OrderModel> sales = PrefUtils.sales;
+  final RxList<OrderModel> sales = HiveSales.sales;
   final RxList<OrderModel> filteredSales = <OrderModel>[].obs;
   bool isAdmin = false;
 
   @override
   void initState() {
     super.initState();
-    // ✅ لا نحتاج لتحميل البيانات - sales هو PrefUtils.sales مباشرة
+    _loadSales();
     _applyDefaultFilter();
 
-    // ✅ مراقبة تغييرات PrefUtils.sales مباشرة
+    // ✅ مراقبة تغييرات HiveSales.sales مباشرة
     ever(sales, (List<OrderModel> newSales) {
       _applyDefaultFilter();
     });
+  }
+
+  Future<void> _loadSales() async {
+    try {
+      await HiveSales.getSales();
+      setState(() {
+        _applyDefaultFilter();
+      });
+    } catch (e) {
+      // Handle error silently or show message
+    }
   }
 
   @override

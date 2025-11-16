@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:gsloution_mobile/common/api_factory/models/partner/partner_model.dart';
 import 'package:gsloution_mobile/common/config/app_colors.dart';
-import 'package:gsloution_mobile/common/config/prefs/pref_utils.dart';
+import 'package:gsloution_mobile/common/config/hive/hive_partners.dart';
 import 'package:gsloution_mobile/src/presentation/screens/customer/customer_sections/customer_list_section.dart';
 import 'package:gsloution_mobile/src/presentation/widgets/draft_indicators/draft_app_bar_badge.dart';
 import 'package:gsloution_mobile/src/presentation/widgets/drawer/dashboard_drawer.dart';
@@ -23,16 +23,32 @@ class _CustomerMainScreenState extends State<CustomerMainScreen> {
   final GlobalKey<ScaffoldState> _key = GlobalKey<ScaffoldState>();
 
   final TextEditingController _searchController = TextEditingController();
-  var partners = PrefUtils.partners.obs;
+  var partners = HivePartners.partners.obs;
   List<PartnerModel> _filteredPartners = [];
   bool isSearch = false;
 
   @override
   void initState() {
     super.initState();
+    _loadPartners();
     _filteredPartners.addAll(
-      PrefUtils.partners.where((partner) => partner.customerRank > 0).toList(),
+      HivePartners.partners
+          .where((partner) => (partner.customerRank ?? 0) > 0)
+          .toList(),
     );
+  }
+
+  Future<void> _loadPartners() async {
+    try {
+      await HivePartners.getPartners();
+      setState(() {
+        _filteredPartners = HivePartners.partners
+            .where((partner) => (partner.customerRank ?? 0) > 0)
+            .toList();
+      });
+    } catch (e) {
+      // Handle error silently or show message
+    }
   }
 
   @override
@@ -42,11 +58,11 @@ class _CustomerMainScreenState extends State<CustomerMainScreen> {
   }
 
   void _filterCustomers(String query) {
-    final filtered = PrefUtils.partners
-        .where((partner) => partner.customerRank > 0)
+    final filtered = HivePartners.partners
+        .where((partner) => (partner.customerRank ?? 0) > 0)
         .toList()
         .where((partner) {
-          final name = partner.name.toLowerCase();
+          final name = (partner.name ?? '').toString().toLowerCase();
           final input = query.toLowerCase();
           return name.contains(input);
         })

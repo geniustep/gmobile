@@ -323,7 +323,7 @@ showSessionDialog() {
           onPressed: () async {
             await PrefUtils.clearPrefs();
             // ✅ استخدام offAllNamed بدلاً من toNamed للعودة الصحيحة
-            Get.offAllNamed(AppRoutes.signIn);
+            Get.offAllNamed(AppRoutes.login);
           },
           child: Text(Localize.signin.tr, style: AppFont.Body2_Regular()),
         ),
@@ -375,7 +375,7 @@ Future<void> handleSessionExpired() async {
   await prefs.clear();
 
   // ✅ استخدام Get.offAllNamed بدلاً من navigatorKey
-  Get.offAllNamed(AppRoutes.signIn);
+  Get.offAllNamed(AppRoutes.login);
 }
 
 // ============= Enhanced Error Handling =============

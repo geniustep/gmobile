@@ -10,8 +10,13 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:gsloution_mobile/common/storage/storage_service.dart';
 import 'package:gsloution_mobile/common/api_factory/bridgecore/factory/api_client_factory.dart';
 import 'package:gsloution_mobile/common/api_factory/bridgecore/websocket/websocket_manager.dart';
-import 'package:gsloution_mobile/common/api_factory/models/user/user_model.dart';
 import 'package:gsloution_mobile/src/routes/app_routes.dart';
+import 'package:gsloution_mobile/common/api_factory/models/product/product_model.dart';
+import 'package:gsloution_mobile/common/api_factory/models/partner/partner_model.dart';
+import 'package:gsloution_mobile/common/api_factory/models/order/sale_order_model.dart';
+import 'package:gsloution_mobile/common/config/hive/hive_products.dart';
+import 'package:gsloution_mobile/common/config/hive/hive_partners.dart';
+import 'package:gsloution_mobile/common/config/hive/hive_sales.dart';
 
 enum SplashState {
   initializing,
@@ -23,6 +28,15 @@ enum SplashState {
 }
 
 class SmartSplashController extends GetxController {
+  // ════════════════════════════════════════════════════════════
+  // Constants
+  // ════════════════════════════════════════════════════════════
+
+  static const Duration _apiTimeout = Duration(seconds: 30);
+  static const Duration _websocketTimeout = Duration(seconds: 10);
+  static const int _maxRetries = 3;
+  static const Duration _retryDelay = Duration(seconds: 2);
+
   // ════════════════════════════════════════════════════════════
   // Observables
   // ════════════════════════════════════════════════════════════
@@ -38,6 +52,13 @@ class SmartSplashController extends GetxController {
 
   final StorageService _storage = StorageService.instance;
   final Connectivity _connectivity = Connectivity();
+
+  // ════════════════════════════════════════════════════════════
+  // Resources to Cleanup
+  // ════════════════════════════════════════════════════════════
+
+  Timer? _timeoutTimer;
+  StreamSubscription<ConnectivityResult>? _connectivitySubscription;
 
   // ════════════════════════════════════════════════════════════
   // Lifecycle
@@ -188,34 +209,58 @@ class SmartSplashController extends GetxController {
   }
 
   // ════════════════════════════════════════════════════════════
-  // Validate Token
+  // Validate Token (Improved with Timeout & Retry)
   // ════════════════════════════════════════════════════════════
 
   Future<bool> _validateToken(String token) async {
-    try {
-      final client = ApiClientFactory.instance;
-      final completer = Completer<bool>();
+    return await _retryOperation(
+      operation: () async {
+        final client = ApiClientFactory.instance;
+        final completer = Completer<bool>();
+        Timer? timeoutTimer;
 
-      // Try to fetch user info as token validation
-      await client.read(
-        model: 'res.users',
-        ids: [],
-        fields: ['id', 'name', 'email'],
-        onResponse: (_) {
-          if (kDebugMode) print('✅ Token validation successful');
-          completer.complete(true);
-        },
-        onError: (error, data) {
-          if (kDebugMode) print('❌ Token validation failed: $error');
-          completer.complete(false);
-        },
-      );
+        try {
+          // Set timeout
+          timeoutTimer = Timer(_apiTimeout, () {
+            if (!completer.isCompleted) {
+              if (kDebugMode) print('⏱️ Token validation timeout');
+              completer.complete(false);
+            }
+          });
 
-      return await completer.future;
-    } catch (e) {
-      if (kDebugMode) print('❌ Token validation failed: $e');
-      return false;
-    }
+          // Try to fetch current user info as token validation
+          // Using searchRead with limit 1 to get current user
+          await client.searchRead(
+            model: 'res.users',
+            domain: [],
+            fields: ['id', 'name', 'email'],
+            limit: 1,
+            onResponse: (response) {
+              timeoutTimer?.cancel();
+              if (response is List && response.isNotEmpty) {
+                if (kDebugMode) print('✅ Token validation successful');
+                completer.complete(true);
+              } else {
+                if (kDebugMode) print('❌ Token validation: No user found');
+                completer.complete(false);
+              }
+            },
+            onError: (error, data) {
+              timeoutTimer?.cancel();
+              if (kDebugMode) print('❌ Token validation failed: $error');
+              completer.complete(false);
+            },
+          );
+
+          return await completer.future;
+        } catch (e) {
+          timeoutTimer?.cancel();
+          if (kDebugMode) print('❌ Token validation exception: $e');
+          return false;
+        }
+      },
+      operationName: 'Token Validation',
+    );
   }
 
   // ════════════════════════════════════════════════════════════
@@ -250,20 +295,26 @@ class SmartSplashController extends GetxController {
   }
 
   // ════════════════════════════════════════════════════════════
-  // Initialize WebSocket
+  // Initialize WebSocket (Improved with Timeout)
   // ════════════════════════════════════════════════════════════
 
   Future<void> _initializeWebSocket(String token) async {
     try {
       if (kDebugMode) print('🔌 Initializing WebSocket...');
 
-      await WebSocketManager.instance.enable();
-      await WebSocketManager.instance.connect(token);
+      await _executeWithTimeout(
+        operation: () async {
+          await WebSocketManager.instance.enable();
+          await WebSocketManager.instance.connect(token);
+        },
+        timeout: _websocketTimeout,
+        operationName: 'WebSocket Connection',
+      );
 
       if (kDebugMode) print('✅ WebSocket connected');
     } catch (e) {
       if (kDebugMode) print('⚠️ WebSocket initialization failed: $e');
-      // Continue without WebSocket
+      // Continue without WebSocket - not critical
     }
   }
 
@@ -293,6 +344,7 @@ class SmartSplashController extends GetxController {
         _loadStockPicking(client),
       ]).catchError((e) {
         if (kDebugMode) print('⚠️ Secondary data loading failed: $e');
+        return <void>[];
       });
     } catch (e) {
       if (kDebugMode) print('❌ Parallel data loading failed: $e');
@@ -304,32 +356,63 @@ class SmartSplashController extends GetxController {
     try {
       statusMessage.value = 'جاري تحميل المنتجات...';
 
-      final completer = Completer<List<dynamic>>();
+      final products = await _executeWithTimeout<List<dynamic>>(
+        operation: () async {
+          final completer = Completer<List<dynamic>>();
 
-      await client.searchRead(
-        model: 'product.product',
-        domain: [
-          ['sale_ok', '=', true],
-        ],
-        fields: ['id', 'name', 'default_code', 'list_price', 'standard_price'],
-        limit: 1000,
-        onResponse: (response) {
-          final products = (response as List).toList();
-          completer.complete(products);
+          await client.searchRead(
+            model: 'product.product',
+            domain: [
+              ['sale_ok', '=', true],
+            ],
+            fields: [
+              'id',
+              'name',
+              'default_code',
+              'list_price',
+              'standard_price',
+            ],
+            limit: 1000,
+            onResponse: (response) {
+              final productsList = (response as List).toList();
+              completer.complete(productsList);
+            },
+            onError: (error, data) {
+              completer.completeError(error);
+            },
+          );
+
+          return await completer.future;
         },
-        onError: (error, data) {
-          completer.completeError(error);
-        },
+        timeout: _apiTimeout,
+        operationName: 'Load Products',
       );
 
-      final products = await completer.future;
+      // Convert to ProductModel and save to Hive (updates RxList automatically)
+      if (products.isNotEmpty) {
+        try {
+          final productModels = products
+              .map((p) => ProductModel.fromJson(p as Map<String, dynamic>))
+              .toList();
 
-      // Save to cache
-      // await _storage.setProducts(products);
+          // Use HiveProducts.setProducts() - saves to Hive AND updates RxList
+          await HiveProducts.setProducts(RxList(productModels));
+
+          if (kDebugMode) {
+            print('✅ Saved ${productModels.length} products to Hive');
+            print(
+              '✅ Updated HiveProducts.products (${HiveProducts.products.length} items)',
+            );
+          }
+        } catch (e) {
+          if (kDebugMode) print('⚠️ Failed to save products to Hive: $e');
+        }
+      }
 
       if (kDebugMode) print('✅ Loaded ${products.length} products');
     } catch (e) {
       if (kDebugMode) print('⚠️ Products loading failed: $e');
+      rethrow;
     }
   }
 
@@ -337,32 +420,57 @@ class SmartSplashController extends GetxController {
     try {
       statusMessage.value = 'جاري تحميل العملاء...';
 
-      final completer = Completer<List<dynamic>>();
+      final partners = await _executeWithTimeout<List<dynamic>>(
+        operation: () async {
+          final completer = Completer<List<dynamic>>();
 
-      await client.searchRead(
-        model: 'res.partner',
-        domain: [
-          ['customer_rank', '>', 0],
-        ],
-        fields: ['id', 'name', 'email', 'phone', 'mobile'],
-        limit: 1000,
-        onResponse: (response) {
-          final partners = (response as List).toList();
-          completer.complete(partners);
+          await client.searchRead(
+            model: 'res.partner',
+            domain: [
+              ['customer_rank', '>', 0],
+            ],
+            fields: ['id', 'name', 'email', 'phone', 'mobile'],
+            limit: 1000,
+            onResponse: (response) {
+              final partnersList = (response as List).toList();
+              completer.complete(partnersList);
+            },
+            onError: (error, data) {
+              completer.completeError(error);
+            },
+          );
+
+          return await completer.future;
         },
-        onError: (error, data) {
-          completer.completeError(error);
-        },
+        timeout: _apiTimeout,
+        operationName: 'Load Partners',
       );
 
-      final partners = await completer.future;
+      // Convert to PartnerModel and save to Hive (updates RxList automatically)
+      if (partners.isNotEmpty) {
+        try {
+          final partnerModels = partners
+              .map((p) => PartnerModel.fromJson(p as Map<String, dynamic>))
+              .toList();
 
-      // Save to cache
-      // await _storage.setPartners(partners);
+          // Use HivePartners.setPartners() - saves to Hive AND updates RxList
+          await HivePartners.setPartners(RxList(partnerModels));
+
+          if (kDebugMode) {
+            print('✅ Saved ${partnerModels.length} partners to Hive');
+            print(
+              '✅ Updated HivePartners.partners (${HivePartners.partners.length} items)',
+            );
+          }
+        } catch (e) {
+          if (kDebugMode) print('⚠️ Failed to save partners to Hive: $e');
+        }
+      }
 
       if (kDebugMode) print('✅ Loaded ${partners.length} partners');
     } catch (e) {
       if (kDebugMode) print('⚠️ Partners loading failed: $e');
+      rethrow;
     }
   }
 
@@ -370,30 +478,55 @@ class SmartSplashController extends GetxController {
     try {
       statusMessage.value = 'جاري تحميل المبيعات...';
 
-      final completer = Completer<List<dynamic>>();
+      final sales = await _executeWithTimeout<List<dynamic>>(
+        operation: () async {
+          final completer = Completer<List<dynamic>>();
 
-      await client.searchRead(
-        model: 'sale.order',
-        domain: [],
-        fields: ['id', 'name', 'partner_id', 'amount_total', 'state'],
-        limit: 100,
-        onResponse: (response) {
-          final sales = (response as List).toList();
-          completer.complete(sales);
+          await client.searchRead(
+            model: 'sale.order',
+            domain: [],
+            fields: ['id', 'name', 'partner_id', 'amount_total', 'state'],
+            limit: 100,
+            onResponse: (response) {
+              final salesList = (response as List).toList();
+              completer.complete(salesList);
+            },
+            onError: (error, data) {
+              completer.completeError(error);
+            },
+          );
+
+          return await completer.future;
         },
-        onError: (error, data) {
-          completer.completeError(error);
-        },
+        timeout: _apiTimeout,
+        operationName: 'Load Sales',
       );
 
-      final sales = await completer.future;
+      // Convert to OrderModel and save to Hive (updates RxList automatically)
+      if (sales.isNotEmpty) {
+        try {
+          final orderModels = sales
+              .map((s) => OrderModel.fromJson(s as Map<String, dynamic>))
+              .toList();
 
-      // Save to cache
-      // await _storage.setSales(sales);
+          // Use HiveSales.setSales() - saves to Hive AND updates RxList
+          await HiveSales.setSales(RxList(orderModels));
+
+          if (kDebugMode) {
+            print('✅ Saved ${orderModels.length} sales to Hive');
+            print(
+              '✅ Updated HiveSales.sales (${HiveSales.sales.length} items)',
+            );
+          }
+        } catch (e) {
+          if (kDebugMode) print('⚠️ Failed to save sales to Hive: $e');
+        }
+      }
 
       if (kDebugMode) print('✅ Loaded ${sales.length} sales');
     } catch (e) {
       if (kDebugMode) print('⚠️ Sales loading failed: $e');
+      rethrow;
     }
   }
 
@@ -488,20 +621,20 @@ class SmartSplashController extends GetxController {
       statusMessage.value = 'وضع عدم الاتصال - تحميل من الذاكرة...';
       progress.value = 0.8;
 
-      // Load from cache
-      final products = await _storage.getProducts();
-      final partners = await _storage.getPartners();
-      final sales = await _storage.getSales();
+      // Load from Hive (automatically updates RxList)
+      final productsList = await HiveProducts.getProducts();
+      final partnersList = await HivePartners.getPartners();
+      final salesList = await HiveSales.getSales();
 
       if (kDebugMode) {
-        print('📦 Cache: ${products.length} products');
-        print('👥 Cache: ${partners.length} partners');
-        print('🛒 Cache: ${sales.length} sales');
+        print('📦 Hive: ${productsList.length} products');
+        print('👥 Hive: ${partnersList.length} partners');
+        print('🛒 Hive: ${salesList.length} sales');
       }
 
-      if (products.isEmpty && partners.isEmpty && sales.isEmpty) {
+      if (productsList.isEmpty && partnersList.isEmpty && salesList.isEmpty) {
         // No cache available
-        if (kDebugMode) print('⚠️ No cache available');
+        if (kDebugMode) print('⚠️ No cache available in Hive');
         _handleError('لا توجد بيانات محفوظة. يرجى الاتصال بالإنترنت.');
         return;
       }
@@ -563,9 +696,79 @@ class SmartSplashController extends GetxController {
     );
   }
 
+  // ════════════════════════════════════════════════════════════
+  // Helper Methods: Timeout & Retry
+  // ════════════════════════════════════════════════════════════
+
+  /// Execute operation with timeout
+  Future<T> _executeWithTimeout<T>({
+    required Future<T> Function() operation,
+    required Duration timeout,
+    required String operationName,
+  }) async {
+    return await Future.any([
+      operation(),
+      Future.delayed(timeout).then((_) {
+        throw TimeoutException(
+          '$operationName timed out after ${timeout.inSeconds} seconds',
+          timeout,
+        );
+      }),
+    ]);
+  }
+
+  /// Retry operation with exponential backoff
+  Future<T> _retryOperation<T>({
+    required Future<T> Function() operation,
+    required String operationName,
+    int maxRetries = _maxRetries,
+  }) async {
+    int attempt = 0;
+    Exception? lastException;
+
+    while (attempt < maxRetries) {
+      try {
+        return await operation();
+      } catch (e) {
+        lastException = e is Exception ? e : Exception(e.toString());
+        attempt++;
+
+        if (attempt < maxRetries) {
+          if (kDebugMode) {
+            print(
+              '⚠️ $operationName failed (attempt $attempt/$maxRetries): $e',
+            );
+            print('🔄 Retrying in ${_retryDelay.inSeconds} seconds...');
+          }
+          await Future.delayed(_retryDelay * attempt); // Exponential backoff
+        } else {
+          if (kDebugMode) {
+            print('❌ $operationName failed after $maxRetries attempts');
+          }
+        }
+      }
+    }
+
+    throw lastException ??
+        Exception('$operationName failed after $maxRetries attempts');
+  }
+
+  // ════════════════════════════════════════════════════════════
+  // Cleanup
+  // ════════════════════════════════════════════════════════════
+
   @override
   void onClose() {
-    // Cleanup if needed
+    // Cancel timeout timer
+    _timeoutTimer?.cancel();
+    _timeoutTimer = null;
+
+    // Cancel connectivity subscription
+    _connectivitySubscription?.cancel();
+    _connectivitySubscription = null;
+
+    if (kDebugMode) print('🧹 SmartSplashController cleaned up');
+
     super.onClose();
   }
 }

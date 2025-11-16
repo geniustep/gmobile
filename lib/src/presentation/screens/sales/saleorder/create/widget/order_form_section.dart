@@ -58,12 +58,9 @@ class _OrderFormSectionState extends State<OrderFormSection> {
       myPartners.assignAll(widget.partners);
     } else {
       myPartners.assignAll(
-        widget.partners.where((e) {
-          if (e.customerRank != null && e.customerRank != false) {
-            return e.customerRank > 0;
-          }
-          return false;
-        }).toList(),
+        widget.partners
+            .where((e) => (e.customerRank ?? 0) > 0)
+            .toList(),
       );
     }
     return myPartners;

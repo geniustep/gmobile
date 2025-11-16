@@ -63,7 +63,7 @@ class _AppState extends State<App> {
       supportedLocales: Config.supportedLocales,
       navigatorKey: navigatorKey,
       initialRoute: widget.isLoggedIn
-          ? AppRoutes.splashScreen
+          ? AppRoutes.smartSplashScreen
           : AppRoutes.login,
     );
   }

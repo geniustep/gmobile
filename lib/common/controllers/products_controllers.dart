@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:gsloution_mobile/common/config/import.dart';
-import 'package:gsloution_mobile/common/config/prefs/pref_utils.dart';
+import 'package:gsloution_mobile/common/config/hive/hive_products.dart';
 import 'package:gsloution_mobile/common/widgets/barcodeScannerPage.dart';
 import 'package:gsloution_mobile/src/routes/app_routes.dart';
 
@@ -45,19 +45,22 @@ class ProductsController extends GetxController {
     }
   }
 
-  void initializeController(TickerProvider vsync) {
+  Future<void> initializeController(TickerProvider vsync) async {
     try {
       _log('Initializing controller');
       _vsync = vsync;
 
-      if (PrefUtils.products.isEmpty) {
-        _log('No products available in PrefUtils');
+      // Load products from Hive
+      await HiveProducts.getProducts();
+      
+      if (HiveProducts.products.isEmpty) {
+        _log('No products available in Hive');
         isLoading.value = false;
         return;
       }
 
-      products.assignAll(List<ProductModel>.from(PrefUtils.products));
-      _log('Loaded ${products.length} products');
+      products.assignAll(List<ProductModel>.from(HiveProducts.products));
+      _log('Loaded ${products.length} products from Hive');
 
       _initializeCategories();
       _createTabController();
@@ -452,12 +455,14 @@ class ProductsController extends GetxController {
     }
   }
 
-  void refreshProducts() {
+  Future<void> refreshProducts() async {
     try {
       _log('Refreshing products');
       isLoading.value = true;
 
-      products.assignAll(List<ProductModel>.from(PrefUtils.products));
+      // Reload from Hive
+      await HiveProducts.getProducts();
+      products.assignAll(List<ProductModel>.from(HiveProducts.products));
       _initializeCategories();
       _applyDefaultFilter();
 

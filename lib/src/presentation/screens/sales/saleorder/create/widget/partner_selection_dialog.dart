@@ -42,12 +42,9 @@ class _PartnerSelectionDialogState extends State<PartnerSelectionDialog> {
     if (_isAdmin) {
       return widget.partners;
     } else {
-      return widget.partners.where((partner) {
-        if (partner.customerRank != null && partner.customerRank != false) {
-          return partner.customerRank > 0;
-        }
-        return false;
-      }).toList();
+      return widget.partners
+          .where((partner) => (partner.customerRank ?? 0) > 0)
+          .toList();
     }
   }
 

@@ -42,6 +42,7 @@ import 'package:gsloution_mobile/src/presentation/screens/purchase_invoice/purch
 import 'package:gsloution_mobile/src/presentation/screens/sales/purchase_reports/purchase_reports_main_screen.dart';
 import 'package:gsloution_mobile/src/presentation/screens/reports/report_main_screen.dart';
 import 'package:gsloution_mobile/src/presentation/screens/sales/sales_main_screen.dart';
+import 'package:gsloution_mobile/src/presentation/screens/splash_screen/smart_splash_screen.dart';
 import 'package:gsloution_mobile/src/presentation/screens/splash_screen/splash_screen.dart';
 // import 'package:gsloution_mobile/src/presentation/screens/stock_reports/stock_reports_main_screen.dart'; // TODO: Uncomment when StockReportsMainScreen is implemented
 // import 'package:gsloution_mobile/src/presentation/screens/supplier/supplier_main_screen.dart'; // TODO: Uncomment when SupplierMainScreen is implemented
@@ -121,6 +122,7 @@ class AppRoutes {
   static const String addExpenseInvoice = "/addExpenseInvoice";
   static const String salesReturn = "/salesReturn";
   static const String splashScreen = "/splashScreen";
+  static const String smartSplashScreen = "/smartSplashScreen";
   static const String app = '/app';
   static const String homePage = '/homepage';
   static const String product = '/product';
@@ -226,6 +228,7 @@ class AppRoutes {
     ),
     // GetPage(name: salesReturn, page: () => const SalesReturnSection()), // TODO: Uncomment when SalesReturnSection is implemented
     GetPage(name: splashScreen, page: () => const SplashScreen()),
+    GetPage(name: smartSplashScreen, page: () => const SmartSplashScreen()),
     GetPage(
       name: partnerMaps,
       page: () {
