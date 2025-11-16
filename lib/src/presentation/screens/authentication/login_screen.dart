@@ -5,6 +5,9 @@ import 'package:gsloution_mobile/common/config/config.dart';
 import 'package:gsloution_mobile/src/routes/app_routes.dart';
 import 'package:gsloution_mobile/src/utils/contstants.dart';
 import 'package:gsloution_mobile/common/api_factory/modules/authentication_module.dart';
+import 'package:gsloution_mobile/common/api_factory/modules/authentication_bridgecore_module.dart';
+import 'package:gsloution_mobile/common/api_factory/factory/api_client_factory.dart';
+import 'package:gsloution_mobile/common/api_factory/bridgecore/config/api_mode_config.dart';
 import 'package:gsloution_mobile/common/utils/utils.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -273,9 +276,22 @@ class _LoginScreenState extends State<LoginScreen> {
       } else if (_passCtrl.text.isEmpty) {
         showWarning("Please enter password");
       } else {
-        authenticationAPI(_emailController.text, _passCtrl.text);
+        // Use BridgeCore authentication by default
+        // Users can switch to Odoo Direct via Developer Settings
+        final apiMode = ApiModeConfig.instance.currentMode;
+
+        if (apiMode == ApiMode.bridgeCore) {
+          // BridgeCore authentication (default)
+          AuthenticationBridgeCoreModule.signIn(
+            email: _emailController.text,
+            password: _passCtrl.text,
+            database: _dataBase.text,
+          );
+        } else {
+          // Odoo Direct authentication (fallback)
+          authenticationAPI(_emailController.text, _passCtrl.text);
+        }
       }
-      // Get.toNamed(AppRoutes.dashboard);
     }
   }
 

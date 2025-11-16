@@ -36,5 +36,6 @@ class Config {
   static const int SIGNIN = 1;
   static const String CURRENCY_SYMBOL = "Dh";
   static String FCM_TOKEN = "";
-  static String dataBase = "done2026";
+  // Default database - now aligned with BridgeCore
+  static String dataBase = bridgeCoreDefaultDatabase; // "done"
 }
