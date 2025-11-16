@@ -19,6 +19,8 @@ import 'package:gsloution_mobile/common/api_factory/bridgecore/base/base_api_cli
 import 'package:gsloution_mobile/common/api_factory/bridgecore/config/api_mode_config.dart';
 import 'package:gsloution_mobile/common/api_factory/dio_factory.dart';
 import 'package:gsloution_mobile/common/utils/utils.dart';
+import 'package:gsloution_mobile/common/api_factory/bridgecore/deduplication/request_deduplicator.dart';
+import 'package:gsloution_mobile/common/api_factory/bridgecore/resilience/circuit_breaker.dart';
 
 class BridgeCoreClient implements BaseApiClient {
   // ════════════════════════════════════════════════════════════
@@ -34,6 +36,9 @@ class BridgeCoreClient implements BaseApiClient {
   String? _systemId;
   bool _isAuthenticated = false;
 
+  // Circuit Breaker for resilience
+  late final CircuitBreaker _circuitBreaker;
+
   // ════════════════════════════════════════════════════════════
   // Constructor
   // ════════════════════════════════════════════════════════════
@@ -44,6 +49,13 @@ class BridgeCoreClient implements BaseApiClient {
         _baseUrl = ApiModeConfig.instance.bridgeCoreUrl {
     _setupInterceptors();
     _loadTokens();
+
+    // Initialize Circuit Breaker
+    _circuitBreaker = CircuitBreaker(
+      name: 'BridgeCore',
+      failureThreshold: 5,
+      resetTimeout: const Duration(minutes: 1),
+    );
   }
 
   // ════════════════════════════════════════════════════════════
@@ -63,6 +75,7 @@ class BridgeCoreClient implements BaseApiClient {
           // إضافة Headers الأساسية
           options.headers['Content-Type'] = 'application/json';
           options.headers['Accept'] = 'application/json';
+          options.headers['Accept-Encoding'] = 'gzip, deflate';
           options.headers['User-Agent'] = 'GMobile-Flutter-App/1.0';
 
           if (kDebugMode) {
@@ -626,26 +639,38 @@ class BridgeCoreClient implements BaseApiClient {
       return;
     }
 
+    final endpoint = '/api/v1/systems/$_systemId/odoo/$operation';
+
     try {
-      if (showGlobalLoading == true) {
-        showLoading();
-      }
+      // Use Circuit Breaker and Request Deduplication
+      final result = await _circuitBreaker.execute(() async {
+        return await RequestDeduplicator.instance.deduplicate(
+          endpoint: endpoint,
+          data: data,
+          request: () async {
+            if (showGlobalLoading == true) {
+              showLoading();
+            }
 
-      final response = await _dio.post(
-        '$_baseUrl/api/v1/systems/$_systemId/odoo/$operation',
-        data: data,
-      );
+            final response = await _dio.post(
+              '$_baseUrl$endpoint',
+              data: data,
+            );
 
-      if (showGlobalLoading == true) {
-        hideLoading();
-      }
+            if (showGlobalLoading == true) {
+              hideLoading();
+            }
 
-      if (response.statusCode == 200) {
-        final result = response.data['result'];
-        onResponse(result);
-      } else {
-        onError('Operation failed', response.data ?? {});
-      }
+            if (response.statusCode == 200) {
+              return response.data['result'];
+            } else {
+              throw Exception('Operation failed');
+            }
+          },
+        );
+      });
+
+      onResponse(result);
     } catch (e) {
       if (showGlobalLoading == true) {
         hideLoading();
@@ -655,7 +680,9 @@ class BridgeCoreClient implements BaseApiClient {
         print('❌ BridgeCore operation error: $e');
       }
 
-      if (e is DioException) {
+      if (e is CircuitBreakerException) {
+        onError('Service temporarily unavailable. Please try again later.', {});
+      } else if (e is DioException) {
         final errorMessage = e.response?.data?['message'] ?? 'Operation failed';
         onError(errorMessage, e.response?.data ?? {});
       } else {
@@ -683,6 +710,54 @@ class BridgeCoreClient implements BaseApiClient {
       'systemId': _systemId,
       'hasAccessToken': _accessToken != null,
       'hasRefreshToken': _refreshToken != null,
+      'circuitBreaker': _circuitBreaker.getStats(),
+      'deduplication': RequestDeduplicator.instance.getStats(),
     };
+  }
+
+  /// Get Circuit Breaker statistics
+  Map<String, dynamic> getCircuitBreakerStats() {
+    return _circuitBreaker.getStats();
+  }
+
+  /// Get Request Deduplication statistics
+  Map<String, dynamic> getDeduplicationStats() {
+    return RequestDeduplicator.instance.getStats();
+  }
+
+  /// Print all statistics
+  void printAllStats() {
+    if (!kDebugMode) return;
+
+    print('\n═══════════════════════════════════════════════════════');
+    print('📊 BridgeCore Client Statistics');
+    print('═══════════════════════════════════════════════════════');
+
+    // Connection Info
+    final connInfo = getConnectionInfo();
+    print('System: ${connInfo['system']}');
+    print('Base URL: ${connInfo['baseUrl']}');
+    print('Authenticated: ${connInfo['isAuthenticated']}');
+    print('System ID: ${connInfo['systemId']}');
+    print('');
+
+    // Circuit Breaker
+    _circuitBreaker.printStats();
+    print('');
+
+    // Request Deduplication
+    RequestDeduplicator.instance.printStats();
+
+    print('═══════════════════════════════════════════════════════\n');
+  }
+
+  /// Reset Circuit Breaker
+  void resetCircuitBreaker() {
+    _circuitBreaker.reset();
+  }
+
+  /// Reset Deduplication Stats
+  void resetDeduplicationStats() {
+    RequestDeduplicator.instance.reset();
   }
 }
