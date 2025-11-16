@@ -10,7 +10,8 @@ import 'package:gsloution_mobile/common/config/import.dart';
 import 'package:gsloution_mobile/common/config/prefs/pref_utils.dart';
 import 'package:gsloution_mobile/common/controllers/mixins/websocket_mixin.dart';
 
-class ProductsControllerWithWebSocket extends GetxController with WebSocketMixin {
+class ProductsControllerWithWebSocket extends GetxController
+    with WebSocketMixin {
   final RxList<ProductModel> products = <ProductModel>[].obs;
   final RxList<ProductModel> filteredProducts = <ProductModel>[].obs;
   final RxBool isLoading = false.obs;
@@ -49,7 +50,6 @@ class ProductsControllerWithWebSocket extends GetxController with WebSocketMixin
       if (kDebugMode) {
         print('✅ Loaded ${products.length} products from cache');
       }
-
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error loading products: $e');
@@ -72,10 +72,7 @@ class ProductsControllerWithWebSocket extends GetxController with WebSocketMixin
       }
 
       // Create ProductModel from data
-      final newProduct = ProductModel.fromJson({
-        'id': id,
-        ...data,
-      });
+      final newProduct = ProductModel.fromJson({'id': id, ...data});
 
       // Add to list
       products.insert(0, newProduct);
@@ -91,7 +88,6 @@ class ProductsControllerWithWebSocket extends GetxController with WebSocketMixin
         snackPosition: SnackPosition.TOP,
         duration: const Duration(seconds: 2),
       );
-
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error handling product creation: $e');
@@ -121,9 +117,9 @@ class ProductsControllerWithWebSocket extends GetxController with WebSocketMixin
       // Update product data
       final updatedProduct = products[index].copyWith(
         name: data['name'] ?? products[index].name,
-        defaultCode: data['default_code'] ?? products[index].defaultCode,
-        listPrice: data['list_price'] ?? products[index].listPrice,
-        standardPrice: data['standard_price'] ?? products[index].standardPrice,
+        defaultCode: data['default_code'] ?? products[index].default_code,
+        listPrice: data['list_price'] ?? products[index].list_price,
+        standardPrice: data['standard_price'] ?? products[index].standard_price,
         // Add more fields as needed
       );
 
@@ -140,7 +136,6 @@ class ProductsControllerWithWebSocket extends GetxController with WebSocketMixin
         snackPosition: SnackPosition.TOP,
         duration: const Duration(seconds: 2),
       );
-
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error handling product update: $e');
@@ -180,7 +175,6 @@ class ProductsControllerWithWebSocket extends GetxController with WebSocketMixin
         snackPosition: SnackPosition.TOP,
         duration: const Duration(seconds: 2),
       );
-
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error handling product deletion: $e');
@@ -214,7 +208,6 @@ class ProductsControllerWithWebSocket extends GetxController with WebSocketMixin
       if (kDebugMode) {
         print('✅ Products refreshed');
       }
-
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error refreshing products: $e');
@@ -240,9 +233,9 @@ extension ProductModelExtension on ProductModel {
     return ProductModel(
       id: id ?? this.id,
       name: name ?? this.name,
-      defaultCode: defaultCode ?? this.defaultCode,
-      listPrice: listPrice ?? this.listPrice,
-      standardPrice: standardPrice ?? this.standardPrice,
+      default_code: defaultCode ?? this.default_code,
+      list_price: listPrice ?? this.list_price,
+      standard_price: standardPrice ?? this.list_price,
       // Add other fields as needed
     );
   }

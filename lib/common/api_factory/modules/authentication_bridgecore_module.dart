@@ -5,8 +5,9 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
-import 'package:gsloution_mobile/common/api_factory/factory/api_client_factory.dart';
+import 'package:gsloution_mobile/common/api_factory/bridgecore/factory/api_client_factory.dart';
 import 'package:gsloution_mobile/common/api_factory/bridgecore/clients/bridgecore_client.dart';
 import 'package:gsloution_mobile/common/storage/storage_service.dart';
 import 'package:gsloution_mobile/common/api_factory/bridgecore/websocket/websocket_manager.dart';
@@ -37,57 +38,87 @@ class AuthenticationBridgeCoreModule {
       }
 
       // Get BridgeCore client
-      final client = ApiClientFactory.instance.getClient() as BridgeCoreClient;
+      final client = ApiClientFactory.instance as BridgeCoreClient;
 
       // Authenticate with BridgeCore
-      final response = await client.authenticate(
-        email: email,
+      // Note: Using email as username since BridgeCore accepts email as username
+      await client.authenticate(
+        username: email,
         password: password,
         database: database ?? Config.bridgeCoreDefaultDatabase,
+        onResponse: (userResponse) async {
+          try {
+            if (kDebugMode) {
+              print('✅ Authentication successful');
+              print('   Response: $userResponse');
+            }
+
+            // Get tokens from secure storage (they're saved by the client)
+            final storage = const FlutterSecureStorage();
+            final accessToken =
+                await storage.read(key: 'bridgecore_access_token') ?? '';
+            final refreshToken = await storage.read(
+              key: 'bridgecore_refresh_token',
+            );
+
+            // Extract user data from response
+            final userData = {
+              'uid': userResponse['uid'],
+              'username': userResponse['username'],
+              'name': userResponse['name'],
+              'company_id': userResponse['company_id'],
+              'partner_id': userResponse['partner_id'],
+            };
+
+            // Create UserModel
+            final user = UserModel.fromJson(userData);
+
+            if (kDebugMode) {
+              print('👤 User: ${user.name} (${user.username})');
+              if (accessToken.isNotEmpty) {
+                print('🔑 Access Token: ${accessToken.substring(0, 20)}...');
+              }
+              if (refreshToken != null && refreshToken.isNotEmpty) {
+                print('🔄 Refresh Token: ${refreshToken.substring(0, 20)}...');
+              }
+            }
+
+            // Save authentication data
+            await _saveAuthenticationData(
+              accessToken: accessToken,
+              refreshToken: refreshToken,
+              user: user,
+            );
+
+            // Initialize WebSocket
+            await _initializeWebSocket(accessToken);
+
+            // Update current user
+            currentUser.value = user;
+
+            if (kDebugMode) {
+              print('✅ SignIn completed successfully');
+              print('   Navigating to splash screen...');
+            }
+
+            // Navigate to splash screen to load data
+            Get.offAllNamed(AppRoutes.splashScreen);
+          } catch (error, stackTrace) {
+            if (kDebugMode) {
+              print('❌ Error processing authentication response: $error');
+              print('📍 Stack trace: $stackTrace');
+            }
+            _handleAuthenticationError(error.toString(), {});
+          }
+        },
+        onError: (error, data) {
+          if (kDebugMode) {
+            print('❌ BridgeCore SignIn failed: $error');
+            print('📊 Error Data: $data');
+          }
+          _handleAuthenticationError(error, data);
+        },
       );
-
-      if (kDebugMode) {
-        print('✅ Authentication successful');
-        print('   Response: $response');
-      }
-
-      // Extract tokens and user data
-      final accessToken = response['access_token'] as String;
-      final refreshToken = response['refresh_token'] as String?;
-      final userData = response['user'] as Map<String, dynamic>;
-
-      // Create UserModel
-      final user = UserModel.fromJson(userData);
-
-      if (kDebugMode) {
-        print('👤 User: ${user.name} (${user.email})');
-        print('🔑 Access Token: ${accessToken.substring(0, 20)}...');
-        if (refreshToken != null) {
-          print('🔄 Refresh Token: ${refreshToken.substring(0, 20)}...');
-        }
-      }
-
-      // Save authentication data
-      await _saveAuthenticationData(
-        accessToken: accessToken,
-        refreshToken: refreshToken,
-        user: user,
-      );
-
-      // Initialize WebSocket
-      await _initializeWebSocket(accessToken);
-
-      // Update current user
-      currentUser.value = user;
-
-      if (kDebugMode) {
-        print('✅ SignIn completed successfully');
-        print('   Navigating to splash screen...');
-      }
-
-      // Navigate to splash screen to load data
-      Get.offAllNamed(AppRoutes.splashScreen);
-
     } catch (error, stackTrace) {
       if (kDebugMode) {
         print('❌ BridgeCore SignIn failed: $error');
@@ -133,7 +164,6 @@ class AuthenticationBridgeCoreModule {
       if (kDebugMode) {
         print('✅ Authentication data saved successfully');
       }
-
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error saving authentication data: $e');
@@ -158,7 +188,6 @@ class AuthenticationBridgeCoreModule {
       if (kDebugMode) {
         print('✅ WebSocket connected');
       }
-
     } catch (e) {
       if (kDebugMode) {
         print('⚠️ WebSocket initialization failed: $e');
@@ -215,7 +244,6 @@ class AuthenticationBridgeCoreModule {
 
       // Navigate to login
       Get.offAllNamed(AppRoutes.login);
-
     } catch (error, stackTrace) {
       if (kDebugMode) {
         print('❌ BridgeCore SignOut failed: $error');
@@ -252,7 +280,6 @@ class AuthenticationBridgeCoreModule {
         print('✅ Sensitive data cleared');
         print('   Cached data preserved for offline access');
       }
-
     } catch (e) {
       if (kDebugMode) {
         print('❌ Error clearing sensitive data: $e');
@@ -265,7 +292,10 @@ class AuthenticationBridgeCoreModule {
   // Error Handling
   // ════════════════════════════════════════════════════════════
 
-  static void _handleAuthenticationError(String error, Map<String, dynamic> data) {
+  static void _handleAuthenticationError(
+    String error,
+    Map<String, dynamic> data,
+  ) {
     if (kDebugMode) {
       print('🔐 Authentication Error: $error');
       print('📊 Error Data: $data');
@@ -327,7 +357,10 @@ class AuthenticationBridgeCoreModule {
             Expanded(
               child: Text(
                 _getErrorTitle(errorType),
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],
@@ -380,7 +413,10 @@ class AuthenticationBridgeCoreModule {
               },
               child: const Text(
                 'إعادة المحاولة',
-                style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: Colors.blue,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ],

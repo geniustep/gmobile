@@ -40,7 +40,7 @@ void main() {
       final newUser = UserModel(
         uid: 1,
         name: 'Test User',
-        login: 'test@example.com',
+        username: 'test@example.com',
       );
 
       // Update currentUser
@@ -81,7 +81,7 @@ void main() {
       final user = UserModel(
         uid: 123,
         name: 'John Doe',
-        login: 'john@example.com',
+        username: 'john@example.com',
       );
 
       currentUser.value = user;
@@ -89,7 +89,7 @@ void main() {
       // Verify all fields are preserved
       expect(currentUser.value.uid, equals(123));
       expect(currentUser.value.name, equals('John Doe'));
-      expect(currentUser.value.login, equals('john@example.com'));
+      expect(currentUser.value.username, equals('john@example.com'));
     });
   });
 

@@ -108,12 +108,19 @@ void main() {
   });
 
   group('CacheManager Error Cases', () {
+    late CacheManager cacheManager;
+
+    setUp(() {
+      cacheManager = CacheManager.instance;
+    });
+
+    tearDown(() async {
+      await cacheManager.invalidateAll();
+    });
+
     test('should handle null key gracefully', () async {
       // Should not throw, but may return null or handle gracefully
-      expect(
-        () => cacheManager.get<String>(key: ''),
-        returnsNormally,
-      );
+      expect(() => cacheManager.get<String>(key: ''), returnsNormally);
     });
 
     test('should handle null data', () async {
@@ -177,14 +184,21 @@ void main() {
       await cacheManager.invalidateAll(); // Second call
 
       // Should not throw
-      expect(
-        () => cacheManager.invalidateAll(),
-        returnsNormally,
-      );
+      expect(() => cacheManager.invalidateAll(), returnsNormally);
     });
   });
 
   group('CacheManager Edge Cases', () {
+    late CacheManager cacheManager;
+
+    setUp(() {
+      cacheManager = CacheManager.instance;
+    });
+
+    tearDown(() async {
+      await cacheManager.invalidateAll();
+    });
+
     test('should handle very short TTL', () async {
       const key = 'short_ttl_key';
       const data = 'test';
@@ -205,11 +219,7 @@ void main() {
       const key = 'zero_ttl_key';
       const data = 'test';
 
-      await cacheManager.set(
-        key: key,
-        data: data,
-        ttl: Duration.zero,
-      );
+      await cacheManager.set(key: key, data: data, ttl: Duration.zero);
 
       final result = await cacheManager.get<String>(key: key);
       // Should be expired immediately

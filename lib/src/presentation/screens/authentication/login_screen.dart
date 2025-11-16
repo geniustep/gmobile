@@ -6,7 +6,6 @@ import 'package:gsloution_mobile/src/routes/app_routes.dart';
 import 'package:gsloution_mobile/src/utils/contstants.dart';
 import 'package:gsloution_mobile/common/api_factory/modules/authentication_module.dart';
 import 'package:gsloution_mobile/common/api_factory/modules/authentication_bridgecore_module.dart';
-import 'package:gsloution_mobile/common/api_factory/factory/api_client_factory.dart';
 import 'package:gsloution_mobile/common/api_factory/bridgecore/config/api_mode_config.dart';
 import 'package:gsloution_mobile/common/utils/utils.dart';
 

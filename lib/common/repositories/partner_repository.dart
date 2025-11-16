@@ -2,9 +2,11 @@
 // PartnerRepository - With Optimistic Updates
 // ════════════════════════════════════════════════════════════
 
+import 'dart:async';
 import 'package:flutter/foundation.dart';
+import 'package:get/get.dart';
 import 'package:gsloution_mobile/common/repositories/base/optimistic_repository.dart';
-import 'package:gsloution_mobile/common/api_factory/factory/api_client_factory.dart';
+import 'package:gsloution_mobile/common/api_factory/bridgecore/factory/api_client_factory.dart';
 import 'package:gsloution_mobile/common/storage/storage_service.dart';
 import 'package:gsloution_mobile/common/config/prefs/pref_utils.dart';
 import 'package:gsloution_mobile/common/api_factory/models/partner/partner_model.dart';
@@ -28,28 +30,42 @@ class PartnerRepository extends OptimisticRepository<PartnerModel> {
     try {
       // Try cache first
       if (!forceRefresh) {
-        final cached = await _storage.getPartners(
-          limit: limit,
-          offset: offset,
-        );
+        final cached = await _storage.getPartners(limit: limit, offset: offset);
 
         if (cached.isNotEmpty) {
           if (kDebugMode) {
-            print('✅ PartnerRepository: Loaded ${cached.length} partners from cache');
+            print(
+              '✅ PartnerRepository: Loaded ${cached.length} partners from cache',
+            );
           }
           return cached;
         }
       }
 
       // Fetch from server
-      final client = ApiClientFactory.instance.getClient();
-      final partners = await client.searchRead(
+      final client = ApiClientFactory.instance;
+      final completer = Completer<List<Map<String, dynamic>>>();
+
+      await client.searchRead(
         model: 'res.partner',
-        domain: [['customer_rank', '>', 0]],
+        domain: [
+          ['customer_rank', '>', 0],
+        ],
         fields: ['id', 'name', 'email', 'phone', 'mobile', 'street', 'city'],
         limit: limit ?? 1000,
         offset: offset,
+        onResponse: (response) {
+          final partners = (response as List)
+              .map((p) => p as Map<String, dynamic>)
+              .toList();
+          completer.complete(partners);
+        },
+        onError: (error, data) {
+          completer.completeError(error);
+        },
       );
+
+      final partners = await completer.future;
 
       // Convert to PartnerModel
       final partnerModels = partners
@@ -59,15 +75,16 @@ class PartnerRepository extends OptimisticRepository<PartnerModel> {
       // Save to cache
       if (offset == null || offset == 0) {
         await _storage.setPartners(partnerModels);
-        await PrefUtils.setPartners(partnerModels.obs);
+        await PrefUtils.setPartners(RxList(partnerModels));
       }
 
       if (kDebugMode) {
-        print('✅ PartnerRepository: Fetched ${partnerModels.length} partners from server');
+        print(
+          '✅ PartnerRepository: Fetched ${partnerModels.length} partners from server',
+        );
       }
 
       return partnerModels;
-
     } catch (e) {
       if (kDebugMode) {
         print('❌ PartnerRepository: Error getting partners: $e');
@@ -113,11 +130,21 @@ class PartnerRepository extends OptimisticRepository<PartnerModel> {
 
       serverUpdate: () async {
         // Send to server
-        final client = ApiClientFactory.instance.getClient();
-        final result = await client.create(
+        final client = ApiClientFactory.instance;
+        final completer = Completer<Map<String, dynamic>>();
+
+        await client.create(
           model: 'res.partner',
           values: partner.toJson(),
+          onResponse: (response) {
+            completer.complete(response as Map<String, dynamic>);
+          },
+          onError: (error, data) {
+            completer.completeError(error);
+          },
         );
+
+        final result = await completer.future;
 
         // Update with real ID
         final realId = result['id'] as int;
@@ -138,7 +165,9 @@ class PartnerRepository extends OptimisticRepository<PartnerModel> {
         }
 
         if (kDebugMode) {
-          print('✅ PartnerRepository: Partner created on server with ID: $realId');
+          print(
+            '✅ PartnerRepository: Partner created on server with ID: $realId',
+          );
         }
       },
 
@@ -210,12 +239,22 @@ class PartnerRepository extends OptimisticRepository<PartnerModel> {
 
       serverUpdate: () async {
         // Send to server
-        final client = ApiClientFactory.instance.getClient();
+        final client = ApiClientFactory.instance;
+        final completer = Completer<void>();
+
         await client.write(
           model: 'res.partner',
           ids: [id],
           values: values,
+          onResponse: (_) {
+            completer.complete();
+          },
+          onError: (error, data) {
+            completer.completeError(error);
+          },
         );
+
+        await completer.future;
 
         if (kDebugMode) {
           print('✅ PartnerRepository: Partner #$id updated on server');
@@ -267,16 +306,17 @@ class PartnerRepository extends OptimisticRepository<PartnerModel> {
         final searchQuery = query.toLowerCase();
 
         return name.contains(searchQuery) ||
-               email.contains(searchQuery) ||
-               phone.contains(searchQuery);
+            email.contains(searchQuery) ||
+            phone.contains(searchQuery);
       }).toList();
 
       if (kDebugMode) {
-        print('🔍 PartnerRepository: Found ${results.length} partners matching "$query"');
+        print(
+          '🔍 PartnerRepository: Found ${results.length} partners matching "$query"',
+        );
       }
 
       return results;
-
     } catch (e) {
       if (kDebugMode) {
         print('❌ PartnerRepository: Error searching partners: $e');

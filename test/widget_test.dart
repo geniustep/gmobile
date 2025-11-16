@@ -8,27 +8,30 @@ import 'package:gsloution_mobile/common/app.dart';
 
 void main() {
   group('App Widget Tests', () {
-    testWidgets('App should build without errors when logged out',
-        (WidgetTester tester) async {
+    testWidgets('App should build without errors when logged out', (
+      WidgetTester tester,
+    ) async {
       // Build app with logged out state
-      await tester.pumpWidget(const App(false));
+      await tester.pumpWidget(App(false));
 
       // App should build successfully
       expect(find.byType(MaterialApp), findsOneWidget);
     });
 
-    testWidgets('App should build without errors when logged in',
-        (WidgetTester tester) async {
+    testWidgets('App should build without errors when logged in', (
+      WidgetTester tester,
+    ) async {
       // Build app with logged in state
-      await tester.pumpWidget(const App(true));
+      await tester.pumpWidget(App(true));
 
       // App should build successfully
       expect(find.byType(MaterialApp), findsOneWidget);
     });
 
-    testWidgets('App should have correct theme mode',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(const App(false));
+    testWidgets('App should have correct theme mode', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(App(false));
 
       final MaterialApp app = tester.widget(find.byType(MaterialApp));
 
@@ -36,9 +39,10 @@ void main() {
       expect(app.theme, isNotNull);
     });
 
-    testWidgets('App should use GetMaterialApp for navigation',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(const App(false));
+    testWidgets('App should use GetMaterialApp for navigation', (
+      WidgetTester tester,
+    ) async {
+      await tester.pumpWidget(App(false));
 
       // GetMaterialApp is a subclass of MaterialApp
       // Verify that navigation is configured
@@ -50,8 +54,8 @@ void main() {
   group('App Initialization Tests', () {
     test('App should accept boolean parameter for login state', () {
       // Test constructor accepts boolean
-      const appLoggedOut = App(false);
-      const appLoggedIn = App(true);
+      final appLoggedOut = App(false);
+      final appLoggedIn = App(true);
 
       expect(appLoggedOut, isNotNull);
       expect(appLoggedIn, isNotNull);
